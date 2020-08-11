@@ -1,19 +1,8 @@
 use crate::condition_codes::ConditionCodes;
+use crate::helpers::is_even;
 use std::convert::TryInto;
 
 const MEMORY_SIZE: usize = 0x4000;
-
-fn is_even(byte: u16) -> bool {
-    let mut y = byte ^ (byte>>1);
-    y = byte ^ (y>>2);
-    y = byte ^ (y>>4);
-    y = byte ^ (y>>8);
-    if y & 1 != 1 {
-       return true
-    }
-    false
-}
-
 
 pub struct CPUState {
     a: u8,
@@ -50,20 +39,20 @@ impl CPUState {
     }
 
     fn arith_flags(&mut self, answer: u16) {
-        self.cc.z = (answer & 0xff) == 0;
-        self.cc.s = answer & 0x80 != 0;
-        self.cc.cy = answer > 0xff;
+        self.cc.z = if (answer & 0xff) == 0 { 1 } else { 0 };
+        self.cc.s = if ( answer & 0x80 != 0 ) { 1 } else { 0 };
+        self.cc.cy = if ( answer > 0xff ) { 1 } else { 0 };
         self.cc.p = is_even(answer & 0xff);
     }
 
     fn add(&mut self, addendum: u8) {
-        let answer: u16 = self.a as u16 + addendum as u16;
+        let answer: u16 = (self.a as u16).wrapping_add(addendum as u16);
         self.arith_flags(answer);
         self.a = answer.to_le_bytes()[0];
     }
 
     fn sub(&mut self, subtract: u8) {
-        let answer: u16 = self.a as u16 - subtract as u16;
+        let answer: u16 = (self.a as u16).wrapping_sub(subtract as u16);
         self.arith_flags(answer);
         self.a = answer.to_le_bytes()[0];
     }
@@ -82,6 +71,91 @@ impl CPUState {
                 self.c = opcode[1];
                 self.b = opcode[2];
                 self.pc += 2
+            }
+            0x02 => {
+                let address: u16 = (self.b as u16) << 8 | self.c as u16;
+                self.memory[address as usize] = self.a;
+            }
+            //TODO 0x02 - 0x05
+            0x06 => {
+                self.b = opcode[1];
+                self.pc += 1;
+            }
+            0x0a => {
+                let address: u16 = (self.b as u16) << 8 | self.c as u16;
+                self.a = self.memory[address as usize];
+            }
+            0x0e => {
+                self.c = opcode[1];
+                self.pc += 1;
+            }
+            0x11 => {
+                self.d = opcode[1];
+                self.e = opcode[2];
+                self.pc += 2;
+            }
+            0x12 => {
+                let address: u16 = (self.d as u16) << 8 | self.e as u16;
+                self.memory[address as usize] = self.a;
+            }
+            0x16 => {
+                self.d = opcode[1];
+                self.pc += 1;
+            }
+            0x1a => {
+                let address: u16 = (self.d as u16) << 8 | self.e as u16;
+                self.a = self.memory[address as usize];
+            }
+            0x1e => {
+                self.e = opcode[1];
+                self.pc += 1;
+            }
+            0x21 => {
+                self.h = opcode[1];
+                self.l = opcode[2];
+                self.pc += 2;
+            }
+            0x22 => {
+                let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+                self.memory[address as usize] = self.l;
+                self.memory[(address + 1) as usize] = self.l;
+                self.pc += 2;
+            }
+            0x26 => {
+                self.h = opcode[1];
+                self.pc += 1;
+            }
+            0x2a => {
+                let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+                self.l = self.memory[address as usize];
+                self.h = self.memory[(address + 1) as usize];
+                self.pc += 2;
+            }
+            0x2e => {
+                self.l = opcode[1];
+                self.pc += 1;
+            }
+            0x36 => {
+                let address: u16 = (self.h as u16) << 8 | self.l as u16;
+                self.memory[address as usize] = opcode[1];
+                self.pc += 1;
+            }
+            0x31 => {
+                let value: u16 = (opcode[2] as u16) << 8 | opcode[1];
+                self.sp = value;
+                self.pc += 2;
+            }
+            0x32 => {
+                let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+                self.memory[address as usize] = self.a;
+            }
+            0x3a => {
+                let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+                self.a = self.memory[address as usize];
+            }
+            0x3e => {
+                self.a = opcode[1];
+                self.pc += 1;
             }
             0x40 => (),
             0x41 => {
@@ -294,7 +368,39 @@ impl CPUState {
             0x87 => {
                 self.add(self.a);
             }
-            // TODO 0x88 to 0x8f
+            0x88 => {
+                let addendum = (self.b).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x89 => {
+                let addendum = (self.c).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8a => {
+                let addendum = (self.d).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8b => {
+                let addendum = (self.e).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8c => {
+                let addendum = (self.h).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8e => {
+                let addendum = (self.l).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8e => {
+                let address: u16 = (self.h as u16) << 8 | self.l as u16;
+                let addendum = (self.memory[address as usize]).wrapping_add(self.cc.cy);
+                self.add(addendum);
+            }
+            0x8f => {
+                let addendum = (self.b).wrapping_add(self.cc.cy);
+                self.add(self.a);
+            }
             0x90 => {
                 self.sub(self.b);
             }
@@ -320,7 +426,47 @@ impl CPUState {
             0x97 => {
                 self.sub(self.a);
             }
-            // TODO 0x98 to 0x9f
+            0x98 => {
+                let subtraend = (self.b).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x99 => {
+                let subtraend = (self.c).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9a => {
+                let subtraend = (self.d).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9b => {
+                let subtraend = (self.e).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9c => {
+                let subtraend = (self.h).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9d => {
+                let subtraend = (self.l).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9e => {
+                let address: u16 = (self.h as u16) << 8 | self.l as u16;
+                let subtraend = (self.memory[address as usize]).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0x9f => {
+                let subtraend = (self.a).wrapping_sub(self.cc.cy);
+                self.sub(subtraend);
+            }
+            0xeb => {
+                let h = self.h;
+                let l = self.l;
+                self.h = self.d;
+                self.l = self.e;
+                self.d = h;
+                self.e = l;
+            }
             _ => (),
         }
     }
