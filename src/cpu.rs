@@ -1,6 +1,19 @@
 use crate::condition_codes::ConditionCodes;
+use std::convert::TryInto;
 
 const MEMORY_SIZE: usize = 0x4000;
+
+fn is_even(byte: u16) -> bool {
+    let mut y = byte ^ (byte>>1);
+    y = byte ^ (y>>2);
+    y = byte ^ (y>>4);
+    y = byte ^ (y>>8);
+    if y & 1 != 1 {
+       return true
+    }
+    false
+}
+
 
 pub struct CPUState {
     a: u8,
@@ -34,6 +47,25 @@ impl CPUState {
             cc: ConditionCodes::new(),
             int_enable: 0,
         }
+    }
+
+    fn arith_flags(&mut self, answer: u16) {
+        self.cc.z = (answer & 0xff) == 0;
+        self.cc.s = answer & 0x80 != 0;
+        self.cc.cy = answer > 0xff;
+        self.cc.p = is_even(answer & 0xff);
+    }
+
+    fn add(&mut self, addendum: u8) {
+        let answer: u16 = self.a as u16 + addendum as u16;
+        self.arith_flags(answer);
+        self.a = answer.to_le_bytes()[0];
+    }
+
+    fn sub(&mut self, subtract: u8) {
+        let answer: u16 = self.a as u16 - subtract as u16;
+        self.arith_flags(answer);
+        self.a = answer.to_le_bytes()[0];
     }
 
     fn unimplemented_instruction(&self) {
@@ -143,7 +175,6 @@ impl CPUState {
             }
             0x60 => {
                 self.h = self.b;
-                self.pc += 1
             }
             0x61 => {
                 self.h = self.c;
@@ -239,55 +270,55 @@ impl CPUState {
             }
             0x7f => (),
             0x80 => {
-                self.a = self.a + self.b;
+                self.add(self.b);
             }
             0x81 => {
-                self.a = self.a + self.c;
+                self.add(self.c);
             }
             0x82 => {
-                self.a = self.a + self.d;
+                self.add(self.d);
             }
             0x83 => {
-                self.a = self.a + self.e;
+                self.add(self.e);
             }
             0x84 => {
-                self.a = self.a + self.h;
+                self.add(self.h);
             }
             0x85 => {
-                self.a = self.a + self.l;
+                self.add(self.l);
             }
             0x86 => {
                 let address: u16 = (self.h as u16) << 8 | self.l as u16;
-                self.a = self.a + self.memory[address as usize];
+                self.add(self.memory[address as usize]);
             }
             0x87 => {
-                self.a = self.a + self.a;
+                self.add(self.a);
             }
             // TODO 0x88 to 0x8f
             0x90 => {
-                self.a = self.a - self.b;
+                self.sub(self.b);
             }
             0x91 => {
-                self.a = self.a - self.c;
+                self.sub(self.c);
             }
             0x92 => {
-                self.a = self.a - self.d;
+                self.sub(self.d);
             }
             0x93 => {
-                self.a = self.a - self.e;
+                self.sub(self.e);
             }
             0x94 => {
-                self.a = self.a - self.h;
+                self.sub(self.h);
             }
             0x95 => {
-                self.a = self.a - self.l;
+                self.sub(self.l);
             }
             0x96 => {
                 let address: u16 = (self.h as u16) << 8 | self.l as u16;
-                self.a = self.a - self.memory[address as usize];
+                self.sub(self.memory[address as usize]);
             }
             0x97 => {
-                self.a = self.a - self.a;
+                self.sub(self.a);
             }
             // TODO 0x98 to 0x9f
             _ => (),

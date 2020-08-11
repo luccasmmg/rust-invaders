@@ -14,10 +14,10 @@ fn main() -> io::Result<()> {
     let mut f = File::open(filename)?;
     f.read_to_end(&mut buffer)?;
 
-    let num1: u8 = 0x7e;
-    let num2: u8 = 0x7d;
-    let num3: u16 = (num1 as u16) <<8|num2 as u16;
-    println!("Num 3 is {:04x}", num3);
+    let num1: u8 = 5;
+    let num2: u8 = 1;
+    let num3: u8 = num2 - num1;
+    println!("Num 3 is {:02x}", num3);
 
     Ok(())
 }
