@@ -40,17 +40,10 @@ impl CPUState {
     }
 }
 
-fn arith_flags(cpu: &CPUState, answer: u16, cy_affected: bool) -> (u8, u8, u8, u8) {
+fn arith_flags(answer: u16) -> (u8, u8, u8, u8) {
     let z = if answer & 0xff == 0 { 1 } else { 0 };
     let s = if answer & 0x80 != 0 { 1 } else { 0 };
-    let mut cy = cpu.cc.cy;
-    if cy_affected {
-        if answer > 0xff {
-            cy = 1
-        } else {
-            cy = 0
-        };
-    }
+    let cy = if answer > 0xff { 1 } else { 0 };
     let p = is_even(answer & 0xff);
     (z, s, cy, p)
 }
@@ -102,7 +95,6 @@ fn mov_r_r(cpu: CPUState, r: char, value: u8) -> CPUState {
         _ => cpu,
     }
 }
-
 
 fn mov_r_m(cpu: CPUState, r: char) -> CPUState {
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
@@ -242,99 +234,484 @@ fn mvi_m(cpu: CPUState) -> CPUState {
 fn lxi(cpu: CPUState, rs: (char, char)) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
     match rs {
-        ('b', 'c') => CPUState { b: opcode[2], c: opcode[1], cycles: 3, pc: cpu.pc + 3, ..cpu},
-        ('d', 'e') => CPUState { d: opcode[2], e: opcode[1], cycles: 3, pc: cpu.pc + 3, ..cpu},
-        ('h', 'l') => CPUState { h: opcode[2], l: opcode[1], cycles: 3, pc: cpu.pc + 3, ..cpu},
-        _ => cpu
+        ('b', 'c') => CPUState {
+            b: opcode[2],
+            c: opcode[1],
+            cycles: 3,
+            pc: cpu.pc + 3,
+            ..cpu
+        },
+        ('d', 'e') => CPUState {
+            d: opcode[2],
+            e: opcode[1],
+            cycles: 3,
+            pc: cpu.pc + 3,
+            ..cpu
+        },
+        ('h', 'l') => CPUState {
+            h: opcode[2],
+            l: opcode[1],
+            cycles: 3,
+            pc: cpu.pc + 3,
+            ..cpu
+        },
+        _ => cpu,
     }
 }
 
 fn lda(cpu: CPUState) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
-    let address: u16 = ( opcode[2] as u16) << 8 | opcode[1] as u16;
-    CPUState { a: cpu.memory[address as usize], cycles: 4, pc: cpu.pc + 3, ..cpu}
+    let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+    CPUState {
+        a: cpu.memory[address as usize],
+        cycles: 4,
+        pc: cpu.pc + 3,
+        ..cpu
+    }
 }
 
 fn sta(cpu: CPUState) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
-    let address: u16 = ( opcode[2] as u16) << 8 | opcode[1] as u16;
+    let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
     let mut memory = cpu.memory;
     memory[address as usize] = cpu.a;
-    CPUState { memory, cycles: 4, pc: cpu.pc + 3, ..cpu}
+    CPUState {
+        memory,
+        cycles: 4,
+        pc: cpu.pc + 3,
+        ..cpu
+    }
 }
 
 fn lhld(cpu: CPUState) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
-    let address_l: u16 = ( opcode[2] as u16) << 8 | opcode[1] as u16;
+    let address_l: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
     let address_h: u16 = address_l + 1;
-    CPUState { h: cpu.memory[address_h as usize], l: cpu.memory[address_l as usize], cycles: 5, pc: cpu.pc + 3, ..cpu}
+    CPUState {
+        h: cpu.memory[address_h as usize],
+        l: cpu.memory[address_l as usize],
+        cycles: 5,
+        pc: cpu.pc + 3,
+        ..cpu
+    }
 }
 
 fn shld(cpu: CPUState) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
-    let address_l: u16 = ( opcode[2] as u16) << 8 | opcode[1] as u16;
+    let address_l: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
     let address_h: u16 = address_l + 1;
     let mut memory = cpu.memory;
     memory[address_l as usize] = cpu.l;
     memory[address_h as usize] = cpu.h;
-    CPUState { memory, cycles: 5, pc: cpu.pc + 3, ..cpu}
+    CPUState {
+        memory,
+        cycles: 5,
+        pc: cpu.pc + 3,
+        ..cpu
+    }
 }
 
 fn ldax(cpu: CPUState, rs: (char, char)) -> CPUState {
     let value: u8;
     match rs {
         ('b', 'c') => {
-            let address: u16 = ( cpu.b as u16) << 8 | cpu.c as u16;
+            let address: u16 = (cpu.b as u16) << 8 | cpu.c as u16;
             value = cpu.memory[address as usize];
-        },
-        ('d', 'e') => {
-            let address: u16 = ( cpu.d as u16) << 8 | cpu.e as u16;
-            value = cpu.memory[address as usize];
-        },
-        _ => {
-            value = cpu.a
         }
+        ('d', 'e') => {
+            let address: u16 = (cpu.d as u16) << 8 | cpu.e as u16;
+            value = cpu.memory[address as usize];
+        }
+        _ => value = cpu.a,
     }
-    CPUState { a: value, cycles: 2, pc: cpu.pc + 1, ..cpu}
+    CPUState {
+        a: value,
+        cycles: 2,
+        pc: cpu.pc + 1,
+        ..cpu
+    }
 }
 
 fn stax(cpu: CPUState, rs: (char, char)) -> CPUState {
     let mut memory = cpu.memory;
     match rs {
         ('b', 'c') => {
-            let address: u16 = ( cpu.b as u16) << 8 | cpu.c as u16;
+            let address: u16 = (cpu.b as u16) << 8 | cpu.c as u16;
             memory[address as usize] = cpu.a;
-        },
+        }
         ('d', 'e') => {
-            let address: u16 = ( cpu.d as u16) << 8 | cpu.e as u16;
+            let address: u16 = (cpu.d as u16) << 8 | cpu.e as u16;
             memory[address as usize] = cpu.a;
-        },
-        _ => ()
+        }
+        _ => (),
     }
-    CPUState { memory, cycles: 2, pc: cpu.pc + 1, ..cpu}
+    CPUState {
+        memory,
+        cycles: 2,
+        pc: cpu.pc + 1,
+        ..cpu
+    }
 }
 
 fn xchg(cpu: CPUState) -> CPUState {
-    CPUState { h: cpu.d, l: cpu.e, d: cpu.h, e: cpu.l, cycles: 1, pc: cpu.pc + 1, ..cpu}
+    CPUState {
+        h: cpu.d,
+        l: cpu.e,
+        d: cpu.h,
+        e: cpu.l,
+        cycles: 1,
+        pc: cpu.pc + 1,
+        ..cpu
+    }
 }
 
-// fn add(addendum: u8) {
-//     let answer: u16 = (self.a as u16).wrapping_add(addendum as u16);
-//     self.arith_flags(answer, true);
-//     self.a = answer.to_le_bytes()[0];
-// }
+fn add(cpu: CPUState, addendum: u8, cycles: u8) -> CPUState {
+    let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
+    let cc = arith_flags(answer);
+    let a = answer.to_le_bytes()[0];
+    let flags = ConditionCodes {
+        z: cc.0,
+        s: cc.1,
+        cy: cc.2,
+        p: cc.3,
+        ..cpu.cc
+    };
+    CPUState {
+        a,
+        cc: flags,
+        pc: cpu.pc + 1,
+        cycles,
+        ..cpu
+    }
+}
 
-// fn inr(register: u8) -> u8 {
-//     let answer: u16 = (register as u16).wrapping_add(1 as u16);
-//     self.arith_flags(answer, true);
-//     answer as u8
-// }
+fn sub(cpu: CPUState, subtraend: u8, cycles: u8) -> CPUState {
+    let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
+    let cc = arith_flags(answer);
+    let a = answer.to_le_bytes()[0];
+    let flags = ConditionCodes {
+        z: cc.0,
+        s: cc.1,
+        cy: cc.2,
+        p: cc.3,
+        ..cpu.cc
+    };
+    CPUState {
+        a,
+        cc: flags,
+        pc: cpu.pc + 1,
+        cycles,
+        ..cpu
+    }
+}
 
-// fn sub(subtract: u8) {
-//     let answer: u16 = (self.a as u16).wrapping_sub(subtract as u16);
-//     self.arith_flags(answer, true);
-//     self.a = answer.to_le_bytes()[0];
-// }
+fn inr_r(cpu: CPUState, r: char, cycles: u8) -> CPUState {
+    match r {
+        'a' => {
+            let answer: u16 = (cpu.a as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                a: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'b' => {
+            let answer: u16 = (cpu.b as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                b: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'c' => {
+            let answer: u16 = (cpu.c as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                c: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'd' => {
+            let answer: u16 = (cpu.d as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                d: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'e' => {
+            let answer: u16 = (cpu.e as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                e: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'h' => {
+            let answer: u16 = (cpu.h as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                h: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'l' => {
+            let answer: u16 = (cpu.l as u16).wrapping_add(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                l: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        }
+        _ => cpu
+    }
+}
+fn inr_m(cpu: CPUState) -> CPUState {
+    let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+    let mut memory = cpu.memory;
+    let answer: u16 = (memory[address as usize] as u16).wrapping_add(1 as u16);
+    let cc = arith_flags(answer);
+    memory[address as usize] = answer.to_be_bytes()[0];
+    let flags = ConditionCodes {
+        z: cc.0,
+        s: cc.1,
+        p: cc.3,
+        ..cpu.cc
+    };
+    CPUState {
+        memory,
+        cc:flags,
+        pc: cpu.pc + 3,
+        cycles: 3,
+        ..cpu
+    }
+}
+
+fn dcr_m(cpu: CPUState) -> CPUState {
+    let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+    let mut memory = cpu.memory;
+    let answer: u16 = (memory[address as usize] as u16).wrapping_sub(1 as u16);
+    memory[address as usize] = answer.to_be_bytes()[0];
+    let cc = arith_flags(answer);
+    let flags = ConditionCodes {
+        z: cc.0,
+        s: cc.1,
+        p: cc.3,
+        ..cpu.cc
+    };
+    CPUState {
+        memory,
+        cc:flags,
+        pc: cpu.pc + 3,
+        cycles: 3,
+        ..cpu
+    }
+}
+
+fn dcr_r(cpu: CPUState, r: char, cycles: u8) -> CPUState {
+    match r {
+        'a' => {
+            let answer: u16 = (cpu.a as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                a: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'b' => {
+            let answer: u16 = (cpu.b as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                b: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'c' => {
+            let answer: u16 = (cpu.c as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                c: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'd' => {
+            let answer: u16 = (cpu.d as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                d: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'e' => {
+            let answer: u16 = (cpu.e as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                e: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'h' => {
+            let answer: u16 = (cpu.h as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                h: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        },
+        'l' => {
+            let answer: u16 = (cpu.l as u16).wrapping_sub(1 as u16);
+            let cc = arith_flags(answer);
+            let flags = ConditionCodes {
+                z: cc.0,
+                s: cc.1,
+                p: cc.3,
+                ..cpu.cc
+            };
+            CPUState {
+                l: answer.to_be_bytes()[0],
+                cc:flags,
+                pc: cpu.pc + 1,
+                cycles,
+                ..cpu
+            }
+
+        }
+        _ => cpu
+    }
+}
+
+
+
 
 // fn dcr(register: u8) -> u8 {
 //     let answer: u16 = (register as u16).wrapping_sub(1 as u16);
@@ -390,11 +767,10 @@ fn xchg(cpu: CPUState) -> CPUState {
 //     panic!("Error: Unimplemented instruction\n")
 // }
 
-// fn emulate_8080_op(cpu: CPUState) -> CPUState {
-//     let pc: usize = self.pc as usize;
-//     let opcode = &self.memory[pc..];
-//     self.pc += 1;
-//     match opcode[0] {
+fn emulate_8080_op(cpu: CPUState) -> CPUState {
+    let pc: usize = cpu.pc as usize;
+    let opcode = &cpu.memory[pc..];
+    match opcode[0] {
 //         0x00 => (),
 
 //         // LXI OPS
@@ -498,8 +874,8 @@ fn xchg(cpu: CPUState) -> CPUState {
 //             self.l = self.inr(self.l);
 //         }
 //         0x34 => {
-//             let address: u16 = (self.h as u16) << 8 | self.l as u16;
-//             self.memory[address as usize] = self.inr(self.memory[address as usize]);
+//             let subress: u16 = (self.h as u16) << 8 | self.l as u16;
+//             self.memory[subress as usize] = self.inr(self.memory[address as usize]);
 //         }
 
 //         // DCR OPS
@@ -796,161 +1172,170 @@ fn xchg(cpu: CPUState) -> CPUState {
 //         }
 //         0x7f => (),
 
-//         // ADD OPS
-//         0x80 => {
-//             self.add(self.b);
-//         }
-//         0x81 => {
-//             self.add(self.c);
-//         }
-//         0x82 => {
-//             self.add(self.d);
-//         }
-//         0x83 => {
-//             self.add(self.e);
-//         }
-//         0x84 => {
-//             self.add(self.h);
-//         }
-//         0x85 => {
-//             self.add(self.l);
-//         }
-//         0x86 => {
-//             let address: u16 = (self.h as u16) << 8 | self.l as u16;
-//             self.add(self.memory[address as usize]);
-//         }
-//         0x87 => {
-//             self.add(self.a);
-//         }
+        // ADD OPS
+        0x80 => {
+            let addendum = cpu.b;
+            add(cpu, addendum, 1)
+        }
+        0x81 => {
+            let addendum = cpu.c;
+            add(cpu, addendum, 1)
+        }
+        0x82 => {
+            let addendum = cpu.d;
+            add(cpu, addendum, 1)
+        }
+        0x83 => {
+            let addendum = cpu.e;
+            add(cpu, addendum, 1)
+        }
+        0x84 => {
+            let addendum = cpu.h;
+            add(cpu, addendum, 1)
+        }
+        0x85 => {
+            let addendum = cpu.l;
+            add(cpu, addendum, 1)
+        }
+        0x86 => {
+            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+            let addendum = cpu.memory[address as usize];
+            add(cpu, addendum, 2)
+        }
+        0x87 => {
+            let addendum = cpu.a;
+            add(cpu, addendum, 1)
+        }
 
-//         // ADC OPS
-//         0x88 => {
-//             let addendum = (self.b).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x89 => {
-//             let addendum = (self.c).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8a => {
-//             let addendum = (self.d).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8b => {
-//             let addendum = (self.e).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8c => {
-//             let addendum = (self.h).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8d => {
-//             let addendum = (self.l).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8e => {
-//             let address: u16 = (self.h as u16) << 8 | self.l as u16;
-//             let addendum = (self.memory[address as usize]).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
-//         0x8f => {
-//             let addendum = (self.a).wrapping_add(self.cc.cy);
-//             self.add(addendum);
-//         }
+        // ADC OPS
+        0x88 => {
+            let addendum = (cpu.b).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x89 => {
+            let addendum = (cpu.c).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8a => {
+            let addendum = (cpu.d).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8b => {
+            let addendum = (cpu.e).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8c => {
+            let addendum = (cpu.h).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8d => {
+            let addendum = (cpu.l).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8e => {
+            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+            let addendum = (cpu.memory[address as usize]).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
+        0x8f => {
+            let addendum = (cpu.a).wrapping_add(cpu.cc.cy);
+            add(cpu, addendum, 2)
+        }
 
-//         // SUB OPS
-//         0x90 => {
-//             self.sub(self.b);
-//         }
-//         0x91 => {
-//             self.sub(self.c);
-//         }
-//         0x92 => {
-//             self.sub(self.d);
-//         }
-//         0x93 => {
-//             self.sub(self.e);
-//         }
-//         0x94 => {
-//             self.sub(self.h);
-//         }
-//         0x95 => {
-//             self.sub(self.l);
-//         }
-//         0x96 => {
-//             let address: u16 = (self.h as u16) << 8 | self.l as u16;
-//             self.sub(self.memory[address as usize]);
-//         }
-//         0x97 => {
-//             self.sub(self.a);
-//         }
+        // SUB OPS
+        0x90 => {
+            let subtraend = cpu.b;
+            sub(cpu, subtraend, 2)
+        }
+        0x91 => {
+            let subtraend = cpu.c;
+            sub(cpu, subtraend, 2)
+        }
+        0x92 => {
+            let subtraend = cpu.d;
+            sub(cpu, subtraend, 2)
+        }
+        0x93 => {
+            let subtraend = cpu.e;
+            sub(cpu, subtraend, 2)
+        }
+        0x94 => {
+            let subtraend = cpu.h;
+            sub(cpu, subtraend, 2)
+        }
+        0x95 => {
+            let subtraend = cpu.l;
+            sub(cpu, subtraend, 2)
+        }
+        0x96 => {
+            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+            let subtraend = cpu.memory[address as usize];
+            sub(cpu, subtraend, 2)
+        }
+        0x97 => {
+            let subtraend = cpu.a;
+            sub(cpu, subtraend, 2)
+        }
 
-//         // SUBB OPS
-//         0x98 => {
-//             let subtraend = (self.b).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x99 => {
-//             let subtraend = (self.c).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9a => {
-//             let subtraend = (self.d).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9b => {
-//             let subtraend = (self.e).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9c => {
-//             let subtraend = (self.h).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9d => {
-//             let subtraend = (self.l).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9e => {
-//             let address: u16 = (self.h as u16) << 8 | self.l as u16;
-//             let subtraend = (self.memory[address as usize]).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
-//         0x9f => {
-//             let subtraend = (self.a).wrapping_sub(self.cc.cy);
-//             self.sub(subtraend);
-//         }
+        // SUBB OPS
+        0x98 => {
+            let subtraend = (cpu.b).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x99 => {
+            let subtraend = (cpu.c).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9a => {
+            let subtraend = (cpu.d).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9b => {
+            let subtraend = (cpu.e).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9c => {
+            let subtraend = (cpu.h).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9d => {
+            let subtraend = (cpu.l).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9e => {
+            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+            let subtraend = (cpu.memory[address as usize]).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
+        0x9f => {
+            let subtraend = (cpu.a).wrapping_sub(cpu.cc.cy);
+            sub(cpu, subtraend, 1)
+        }
 
-//         // ADI OPS
-//         0xc6 => {
-//             let first_byte: u8 = opcode[1];
-//             self.add(first_byte);
-//             self.pc += 1;
-//         }
-//         0xce => {
-//             let first_byte: u8 = opcode[1];
-//             self.add((first_byte).wrapping_add(self.cc.cy));
-//             self.pc += 1;
-//         }
-//         0xeb => {
-//             let h = self.h;
-//             let l = self.l;
-//             self.h = self.d;
-//             self.l = self.e;
-//             self.d = h;
-//             self.e = l;
-//         }
+        // ADI OPS
+        0xc6 => {
+            let first_byte: u8 = opcode[1];
+            add(cpu, first_byte, 2)
+        }
+        0xce => {
+            let first_byte: u8 = opcode[1];
+            let cy: u8 = cpu.cc.cy;
+            add(cpu, (first_byte).wrapping_add(cy), 2)
+        }
+        0xeb => {
+            xchg(cpu)
+        }
 
-//         // SUI OPS
-//         0xd6 => {
-//             let first_byte: u8 = opcode[1];
-//             self.sub(first_byte);
-//             self.pc += 1;
-//         }
-//         0xde => {
-//             let first_byte: u8 = opcode[1];
-//             self.sub((first_byte).wrapping_sub(self.cc.cy));
-//             self.pc += 1;
-//         }
-//         _ => (),
-//     }
-// }
+        // SUI OPS
+        0xd6 => {
+            let subtraend: u8 = opcode[1];
+            sub(cpu, subtraend, 2)
+        }
+        0xde => {
+            let cy = cpu.cc.cy;
+            let subtraend: u8 = opcode[1].wrapping_sub(cy);
+            sub(cpu, subtraend, 2)
+        }
+         _ => cpu,
+    }
+}
