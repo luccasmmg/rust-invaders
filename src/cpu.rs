@@ -710,6 +710,115 @@ fn dcr_r(cpu: CPUState, r: char, cycles: u8) -> CPUState {
     }
 }
 
+fn inx(cpu: CPUState, rp: (char, char)) -> CPUState {
+    match rp {
+        ('b', 'c') => {
+            let result = (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_add(1 as u16)).to_be_bytes();
+            CPUState {
+                b: result[0],
+                c: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('d', 'e') => {
+            let result = (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_add(1 as u16)).to_be_bytes();
+            CPUState {
+                d: result[0],
+                e: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('h', 'l') => {
+            let result = (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_add(1 as u16)).to_be_bytes();
+            CPUState {
+                h: result[0],
+                l: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        _ => cpu
+    }
+}
+
+fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
+    match rp {
+        ('b', 'c') => {
+            let result = (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_sub(1 as u16)).to_be_bytes();
+            CPUState {
+                b: result[0],
+                c: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('d', 'e') => {
+            let result = (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_sub(1 as u16)).to_be_bytes();
+            CPUState {
+                d: result[0],
+                e: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('h', 'l') => {
+            let result = (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_sub(1 as u16)).to_be_bytes();
+            CPUState {
+                h: result[0],
+                l: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        _ => cpu
+    }
+}
+
+fn dad(cpu: CPUState, rp: (char, char)) -> CPUState {
+    let rp_hl: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
+    match rp {
+        ('b', 'c') => {
+            let result = (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_add(rp_hl)).to_be_bytes();
+            CPUState {
+                h: result[0],
+                l: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('d', 'e') => {
+            let result = (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_add(rp_hl)).to_be_bytes();
+            CPUState {
+                h: result[0],
+                l: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        ('h', 'l') => {
+            let result = (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_add(rp_hl)).to_be_bytes();
+            CPUState {
+                h: result[0],
+                l: result[1],
+                pc: cpu.pc + 1,
+                cycles: 1,
+                ..cpu
+            }
+        },
+        _ => cpu
+    }
+}
+
 
 
 
