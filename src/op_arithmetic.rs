@@ -242,7 +242,7 @@ pub fn dcr_m(cpu: CPUState) -> CPUState {
     CPUState {
         memory,
         cc:flags,
-        pc: cpu.pc + 3,
+        pc: cpu.pc + 1,
         cycles: 3,
         ..cpu
     }

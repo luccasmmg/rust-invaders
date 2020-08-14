@@ -6,6 +6,7 @@ mod helpers;
 mod op_data_transfer;
 mod op_arithmetic;
 mod op_logical;
+mod op_branch;
 
 fn main() -> io::Result<()> {
     Ok(())
