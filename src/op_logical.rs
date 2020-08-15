@@ -1,6 +1,6 @@
 #![allow(dead_code)]
-use crate::cpu::CPUState;
 use crate::condition_codes::ConditionCodes;
+use crate::cpu::CPUState;
 use crate::helpers::arith_flags;
 
 pub fn ana(cpu: CPUState, value: u8, cycles: u8) -> CPUState {
@@ -127,9 +127,17 @@ pub fn cmp(cpu: CPUState, value: u8, cycles: u8) -> CPUState {
     let answer = (cpu.a | value) as u16;
     let flags_result = arith_flags(answer);
     let flags = ConditionCodes {
-        z: if answer.to_be_bytes()[1] == cpu.a { 1 } else { cpu.cc.z },
+        z: if answer.to_be_bytes()[1] == cpu.a {
+            1
+        } else {
+            cpu.cc.z
+        },
         s: flags_result.1,
-        cy: if answer.to_be_bytes()[1] > cpu.a { 1 } else { cpu.cc.z },
+        cy: if answer.to_be_bytes()[1] > cpu.a {
+            1
+        } else {
+            cpu.cc.z
+        },
         p: flags_result.3,
         ..cpu.cc
     };
@@ -146,9 +154,17 @@ pub fn cpi(cpu: CPUState, value: u8, cycles: u8) -> CPUState {
     let answer = (cpu.a | value) as u16;
     let flags_result = arith_flags(answer);
     let flags = ConditionCodes {
-        z: if answer.to_be_bytes()[1] == cpu.a { 1 } else { cpu.cc.z },
+        z: if answer.to_be_bytes()[1] == cpu.a {
+            1
+        } else {
+            cpu.cc.z
+        },
         s: flags_result.1,
-        cy: if answer.to_be_bytes()[1] > cpu.a { 1 } else { cpu.cc.z },
+        cy: if answer.to_be_bytes()[1] > cpu.a {
+            1
+        } else {
+            cpu.cc.z
+        },
         p: flags_result.3,
         ..cpu.cc
     };
@@ -168,7 +184,7 @@ pub fn rlc(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc},
+        cc: ConditionCodes { cy, ..cpu.cc },
         ..cpu
     }
 }
@@ -180,7 +196,7 @@ pub fn rrc(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc},
+        cc: ConditionCodes { cy, ..cpu.cc },
         ..cpu
     }
 }
@@ -192,7 +208,7 @@ pub fn rar(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc},
+        cc: ConditionCodes { cy, ..cpu.cc },
         ..cpu
     }
 }
@@ -204,7 +220,7 @@ pub fn ral(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc},
+        cc: ConditionCodes { cy, ..cpu.cc },
         ..cpu
     }
 }
@@ -222,7 +238,10 @@ pub fn cmc(cpu: CPUState) -> CPUState {
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
-        cc: ConditionCodes { cy: !cpu.cc.cy, ..cpu.cc},
+        cc: ConditionCodes {
+            cy: !cpu.cc.cy,
+            ..cpu.cc
+        },
         ..cpu
     }
 }
@@ -231,7 +250,7 @@ pub fn stc(cpu: CPUState) -> CPUState {
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
-        cc: ConditionCodes { cy: 1, ..cpu.cc},
+        cc: ConditionCodes { cy: 1, ..cpu.cc },
         ..cpu
     }
 }

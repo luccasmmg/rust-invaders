@@ -1,100 +1,40 @@
 use crate::cpu::CPUState;
 
-pub fn mov_r_r(cpu: CPUState, r: char, value: u8) -> CPUState {
-    match r {
-        'a' => CPUState {
-            a: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'b' => CPUState {
-            b: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'c' => CPUState {
-            c: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'd' => CPUState {
-            d: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'e' => CPUState {
-            e: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'h' => CPUState {
-            h: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'l' => CPUState {
-            l: value,
-            cycles: 1,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
+pub fn mov_r_r(r: char, value: u8, cpu: CPUState) -> CPUState {
+    let inter_cpu = match r {
+        'a' => CPUState { a: value, ..cpu },
+        'b' => CPUState { b: value, ..cpu },
+        'c' => CPUState { c: value, ..cpu },
+        'd' => CPUState { d: value, ..cpu },
+        'e' => CPUState { h: value, ..cpu },
+        'h' => CPUState { e: value, ..cpu },
+        'l' => CPUState { l: value, ..cpu },
         _ => cpu,
+    };
+    CPUState {
+        cycles: 1,
+        pc: inter_cpu.pc + 1,
+        ..inter_cpu
     }
 }
 
 pub fn mov_r_m(cpu: CPUState, r: char) -> CPUState {
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let value = cpu.memory[address as usize];
-    match r {
-        'a' => CPUState {
-            a: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'b' => CPUState {
-            b: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'c' => CPUState {
-            c: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'd' => CPUState {
-            d: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'e' => CPUState {
-            e: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'h' => CPUState {
-            h: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-        'l' => CPUState {
-            l: value,
-            cycles: 2,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
+    let inter_cpu = match r {
+        'a' => CPUState { a: value, ..cpu },
+        'b' => CPUState { b: value, ..cpu },
+        'c' => CPUState { c: value, ..cpu },
+        'd' => CPUState { d: value, ..cpu },
+        'e' => CPUState { h: value, ..cpu },
+        'h' => CPUState { e: value, ..cpu },
+        'l' => CPUState { l: value, ..cpu },
         _ => cpu,
+    };
+    CPUState {
+        cycles: 2,
+        pc: inter_cpu.pc + 1,
+        ..inter_cpu
     }
 }
 
@@ -122,50 +62,20 @@ pub fn mov_m_r(cpu: CPUState, r: char) -> CPUState {
 pub fn mvi_r(cpu: CPUState, r: char) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
     let value = opcode[1];
-    match r {
-        'a' => CPUState {
-            a: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'b' => CPUState {
-            b: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'c' => CPUState {
-            c: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'd' => CPUState {
-            d: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'e' => CPUState {
-            e: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'h' => CPUState {
-            h: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
-        'l' => CPUState {
-            l: value,
-            cycles: 2,
-            pc: cpu.pc + 2,
-            ..cpu
-        },
+    let inter_cpu = match r {
+        'a' => CPUState { a: value, ..cpu },
+        'b' => CPUState { b: value, ..cpu },
+        'c' => CPUState { c: value, ..cpu },
+        'd' => CPUState { d: value, ..cpu },
+        'e' => CPUState { h: value, ..cpu },
+        'h' => CPUState { e: value, ..cpu },
+        'l' => CPUState { l: value, ..cpu },
         _ => cpu,
+    };
+    CPUState {
+        cycles: 2,
+        pc: inter_cpu.pc + 2,
+        ..inter_cpu
     }
 }
 
