@@ -4,6 +4,7 @@ use crate::helpers::is_even;
 use crate::op_arithmetic::*;
 use crate::op_data_transfer::*;
 use crate::op_logical::*;
+use crate::op_special_io::*;
 
 const MEMORY_SIZE: usize = 0x4000;
 

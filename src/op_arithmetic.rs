@@ -299,43 +299,19 @@ pub fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
 
 pub fn dad(cpu: CPUState, rp: (char, char)) -> CPUState {
     let rp_hl: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
-    match rp {
-        ('b', 'c') => {
-            let result = (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_add(rp_hl)).to_be_bytes();
-            CPUState {
-                h: result[0],
-                l: result[1],
-                pc: cpu.pc + 1,
-                cycles: 1,
-                ..cpu
-            }
-        }
-        ('d', 'e') => {
-            let result = (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_add(rp_hl)).to_be_bytes();
-            CPUState {
-                h: result[0],
-                l: result[1],
-                pc: cpu.pc + 1,
-                cycles: 1,
-                ..cpu
-            }
-        }
-        ('h', 'l') => {
-            let result = (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_add(rp_hl)).to_be_bytes();
-            CPUState {
-                h: result[0],
-                l: result[1],
-                pc: cpu.pc + 1,
-                cycles: 1,
-                ..cpu
-            }
-        }
-        ('s', 'p') => CPUState {
+    if rp == ('s', 'p') {
+        return CPUState {
             sp: cpu.sp.wrapping_add(rp_hl),
             pc: cpu.pc + 1,
             cycles: 1,
             ..cpu
-        },
-        _ => cpu,
+        }
     }
+    let value_to_add = match rp {
+        ('b', 'c') => (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_add(rp_hl)).to_be_bytes(),
+        ('d', 'e') => (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_add(rp_hl)).to_be_bytes(),
+        ('h', 'l') => (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_add(rp_hl)).to_be_bytes(),
+        _ => rp_hl.to_be_bytes(),
+    };
+    CPUState { h: value_to_add[0], l: value_to_add[1], pc: cpu.pc + 1, cycles: 3, ..cpu}
 }
