@@ -22,7 +22,7 @@ pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn adi(cpu: CPUState, addendum: u8, cycles: u8) -> CPUState {
+pub fn adi(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
     let cc = arith_flags(answer);
     let a = answer.to_le_bytes()[0];
@@ -62,7 +62,7 @@ pub fn sub(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn sui(cpu: CPUState, subtraend: u8, cycles: u8) -> CPUState {
+pub fn sui(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
     let cc = arith_flags(answer);
     let a = answer.to_le_bytes()[0];
