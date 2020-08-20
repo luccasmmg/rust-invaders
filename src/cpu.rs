@@ -1,12 +1,19 @@
 #![allow(dead_code)]
 use crate::condition_codes::ConditionCodes;
-use crate::helpers::is_even;
 use crate::op_arithmetic::*;
 use crate::op_data_transfer::*;
-use crate::op_logical::*;
-use crate::op_special_io::*;
+use crate::helpers::get_value_memory;
+//use crate::op_logical::*;
+//use crate::op_special_io::*;
 
-const MEMORY_SIZE: usize = 0x4000;
+pub const MEMORY_SIZE: usize = 0x4000;
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum StackPairs {
+    BC,
+    DE,
+    HL
+}
 
 pub struct CPUState {
     pub a: u8,
@@ -182,18 +189,14 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x7e => mov_r_m(cpu, 'a'),
 
         // ADD OPS
-        0x80 => add(cpu.b, 1, cpu)
-        0x81 => add(cpu.c, 1, cpu)
-        0x82 => add(cpu.d, 1, cpu)
-        0x83 => add(cpu.e, 1, cpu)
-        0x84 => add(cpu.h, 1, cpu)
-        0x85 => add(cpu.l, 1, cpu)
-        0x86 => {
-            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
-            let addendum = cpu.memory[address as usize];
-            add(addendum, 2, cpu)
-        }
-        0x87 => add(cpu.a, 1, cpu)
+        0x80 => add(cpu.b, 1, cpu),
+        0x81 => add(cpu.c, 1, cpu),
+        0x82 => add(cpu.d, 1, cpu),
+        0x83 => add(cpu.e, 1, cpu),
+        0x84 => add(cpu.h, 1, cpu),
+        0x85 => add(cpu.l, 1, cpu),
+        0x86 => add(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0x87 => add(cpu.a, 1, cpu),
         // ADC OPS
         0x88 => add((cpu.b).wrapping_add(cpu.cc.cy), 2, cpu),
         0x89 => add((cpu.c).wrapping_add(cpu.cc.cy), 2, cpu),
@@ -201,11 +204,7 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x8b => add((cpu.e).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8c => add((cpu.h).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8d => add((cpu.l).wrapping_add(cpu.cc.cy), 2, cpu),
-        0x8e => {
-            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
-            let addendum = (cpu.memory[address as usize]).wrapping_add(cpu.cc.cy);
-            add(addendum, 2, cpu)
-        }
+        0x8e => add(get_value_memory(cpu.memory, cpu.h, cpu.l).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8f => add((cpu.a).wrapping_add(cpu.cc.cy), 2, cpu),
 
         // SUB OPS
@@ -215,11 +214,7 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x93 => sub(cpu.e, 2, cpu),
         0x94 => sub(cpu.h, 2, cpu),
         0x95 => sub(cpu.l, 2, cpu),
-        0x96 => {
-            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
-            let subtraend = cpu.memory[address as usize];
-            sub(cpu, subtraend, 2),
-        }
+        0x96 => sub(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
         0x97 => sub(cpu.a, 2, cpu),
 
         // SUBB OPS
@@ -229,35 +224,17 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x9b => sub((cpu.e).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9c => sub((cpu.h).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9d => sub((cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9e => {
-            let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
-            let subtraend = (cpu.memory[address as usize]).wrapping_sub(cpu.cc.cy);
-            sub(cpu, subtraend, 1)
-        }
+        0x9e => sub(get_value_memory(cpu.memory, cpu.h, cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9f => sub((cpu.a).wrapping_sub(cpu.cc.cy), 1, cpu),
 
         // ADI OPS
-        0xc6 => {
-            let first_byte: u8 = opcode[1];
-            adi(cpu, first_byte, 2)
-        }
-        0xce => {
-            let first_byte: u8 = opcode[1];
-            let cy: u8 = cpu.cc.cy;
-            adi(cpu, (first_byte).wrapping_add(cy), 2)
-        }
+        0xc6 => adi(opcode[1], 2, cpu),
+        0xce => adi(opcode[1].wrapping_add(cpu.cc.cy), 2, cpu),
         0xeb => xchg(cpu),
 
         // SUI OPS
-        0xd6 => {
-            let subtraend: u8 = opcode[1];
-            sui(cpu, subtraend, 2)
-        }
-        0xde => {
-            let cy = cpu.cc.cy;
-            let subtraend: u8 = opcode[1].wrapping_sub(cy);
-            sui(cpu, subtraend, 2)
-        }
+        0xd6 => sui(opcode[1], 2, cpu),
+        0xde => sui(opcode[1].wrapping_sub(cpu.cc.cy), 2, cpu),
         _ => cpu,
     }
 }
