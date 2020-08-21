@@ -3,7 +3,8 @@ use crate::condition_codes::ConditionCodes;
 use crate::op_arithmetic::*;
 use crate::op_data_transfer::*;
 use crate::helpers::get_value_memory;
-//use crate::op_logical::*;
+use std::fmt;
+use crate::op_logical::*;
 //use crate::op_special_io::*;
 
 pub const MEMORY_SIZE: usize = 0x4000;
@@ -13,6 +14,24 @@ pub enum StackPairs {
     BC,
     DE,
     HL
+}
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum WithSPPairs {
+    BC,
+    DE,
+    HL,
+    SP
+}
+
+pub enum Registers {
+    A,
+    B,
+    C,
+    D,
+    E,
+    H,
+    L,
 }
 
 pub struct CPUState {
@@ -51,12 +70,18 @@ impl CPUState {
     }
 }
 
+impl fmt::Display for CPUState {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "Registers -> A: {}, B: {}, C: {}, D: {}, E: {}, H: {}, L: {} \n Flags -> Z: {} S: {} P: {} CY: {} AC: {}",
+                self.a, self.b, self.c, self.d, self.e, self.h, self.l, self.cc.z, self.cc.s, self.cc.p, self.cc.cy, self.cc.ac)
+        }
+}
+
 fn emulate_8080_op(cpu: CPUState) -> CPUState {
     let pc: usize = cpu.pc as usize;
     let opcode = &cpu.memory[pc..];
     match opcode[0] {
         //         0x00 => (),
-
         // LXI OPS
         0x01 => lxi(cpu, ('b', 'c')),
         0x11 => lxi(cpu, ('d', 'e')),
@@ -64,16 +89,16 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x31 => lxi(cpu, ('s', 'p')),
 
         // INX OPS
-        0x03 => inx(cpu, ('b', 'c')),
-        0x13 => inx(cpu, ('d', 'e')),
-        0x23 => inx(cpu, ('h', 'l')),
-        0x33 => inx(cpu, ('s', 'p')),
+        0x03 => inx(cpu, WithSPPairs::BC),
+        0x13 => inx(cpu, WithSPPairs::DE),
+        0x23 => inx(cpu, WithSPPairs::HL),
+        0x33 => inx(cpu, WithSPPairs::SP),
 
         // DCX OPS
-        0x0b => dcx(cpu, ('b', 'c')),
-        0x1b => dcx(cpu, ('d', 'e')),
-        0x2b => dcx(cpu, ('h', 'l')),
-        0x3b => dcx(cpu, ('s', 'p')),
+        0x0b => dcx(cpu, WithSPPairs::BC),
+        0x1b => dcx(cpu, WithSPPairs::DE),
+        0x2b => dcx(cpu, WithSPPairs::HL),
+        0x3b => dcx(cpu, WithSPPairs::SP),
 
         //DAD OPS
         0x09 => dad(cpu, ('b', 'c')),
@@ -235,6 +260,70 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         // SUI OPS
         0xd6 => sui(opcode[1], 2, cpu),
         0xde => sui(opcode[1].wrapping_sub(cpu.cc.cy), 2, cpu),
+
+        // ANA OPS
+        0xa0 => ana(cpu.b, 1, cpu),
+        0xa1 => ana(cpu.c, 1, cpu),
+        0xa2 => ana(cpu.d, 1, cpu),
+        0xa3 => ana(cpu.e, 1, cpu),
+        0xa4 => ana(cpu.h, 1, cpu),
+        0xa5 => ana(cpu.l, 1, cpu),
+        0xa6 => ana(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xa7 => ana(cpu.b, 1, cpu),
+
+        // XRA OPS
+        0xa8 => xra(cpu.b, 1, cpu),
+        0xa9 => xra(cpu.c, 1, cpu),
+        0xaa => xra(cpu.d, 1, cpu),
+        0xab => xra(cpu.e, 1, cpu),
+        0xac => xra(cpu.h, 1, cpu),
+        0xad => xra(cpu.l, 1, cpu),
+        0xae => xra(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xaf => xra(cpu.b, 1, cpu),
+
+        // ORA OPS
+        0xb0 => ora(cpu.b, 1, cpu),
+        0xb1 => ora(cpu.c, 1, cpu),
+        0xb2 => ora(cpu.d, 1, cpu),
+        0xb3 => ora(cpu.e, 1, cpu),
+        0xb4 => ora(cpu.h, 1, cpu),
+        0xb5 => ora(cpu.l, 1, cpu),
+        0xb6 => ora(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xb7 => ora(cpu.b, 1, cpu),
+
+        // CMP OPS
+        0xb8 => cmp(cpu.b, 1, cpu),
+        0xb9 => cmp(cpu.c, 1, cpu),
+        0xba => cmp(cpu.d, 1, cpu),
+        0xbb => cmp(cpu.e, 1, cpu),
+        0xbc => cmp(cpu.h, 1, cpu),
+        0xbd => cmp(cpu.l, 1, cpu),
+        0xbe => cmp(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xbf => cmp(cpu.b, 1, cpu),
+
+        //ANI
+        0xe6 => ani(opcode[1], cpu),
+        //XRI
+        0xee => xri(opcode[1], cpu),
+        //ORI
+        0xf6 => ori(opcode[1], cpu),
+        //CPI
+        0xfe => cpi(opcode[1], cpu),
+        //RLC
+        0x07 => rlc(cpu),
+        //RRC
+        0x0f => rrc(cpu),
+        //RAL
+        0x17 => ral(cpu),
+        //RAR
+        0x1f => rar(cpu),
+        //CMA
+        0x2f => cma(cpu),
+        //CMC
+        0x3f => cmc(cpu),
+        //STC
+        0x37 => stc(cpu),
         _ => cpu,
+
     }
 }

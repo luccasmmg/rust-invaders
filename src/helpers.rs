@@ -28,6 +28,6 @@ pub fn get_value_memory(memory: [u8; MEMORY_SIZE], hr: u8, lr: u8) -> u8 {
 pub fn change_value(memory: [u8; MEMORY_SIZE], hr: u8, lr: u8, new_value: u8) -> [u8; MEMORY_SIZE] {
     let address: u16 = (hr as u16) << 8 | lr as u16;
     let mut new_memory = memory;
-    memory[address as usize] = new_value;
-    memory
+    new_memory[address as usize] = new_value;
+    new_memory
 }

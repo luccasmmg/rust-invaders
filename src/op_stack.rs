@@ -78,7 +78,7 @@ pub fn pop_psw(cpu: CPUState) -> CPUState {
     let ac = if psw & 0x10 == 0x10 { 1 } else { 0 };
     CPUState {
         cycles: 3,
-        a: cpu.memory[(cpu.memory - 1) as usize],
+        a: cpu.memory[(cpu.sp + 1) as usize],
         cc: ConditionCodes { z, s, p, cy, ac, ..cpu.cc },
         sp: cpu.sp + 2,
         pc: cpu.pc + 1,
@@ -99,8 +99,7 @@ pub fn xthl(cpu: CPUState) -> CPUState {
 pub fn sphl(cpu: CPUState) -> CPUState {
     let value: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     CPUState {
-        h: cpu.memory[(cpu.sp + 1) as usize],
-        l: cpu.memory[cpu.sp as usize],
+        sp: value,
         cycles: 3,
         pc: cpu.pc + 1,
         ..cpu

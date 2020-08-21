@@ -1,5 +1,6 @@
 use crate::condition_codes::ConditionCodes;
 use crate::cpu::CPUState;
+use crate::cpu::WithSPPairs;
 use crate::helpers::arith_flags;
 
 pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
@@ -112,7 +113,7 @@ pub fn inr_r(cpu: CPUState, r: char) -> CPUState {
             let answer: u16 = (cpu.l as u16).wrapping_add(1 as u16);
             (CPUState { l: answer.to_be_bytes()[0], ..cpu }, answer)
         }
-        _ => (cpu, 0),
+        _ => (CPUState { ..cpu }, 0),
     };
     let cc = arith_flags(answer);
     let flags = ConditionCodes {
@@ -195,7 +196,7 @@ pub fn dcr_r(cpu: CPUState, r: char) -> CPUState {
             let answer: u16 = (cpu.l as u16).wrapping_sub(1 as u16);
             (CPUState { l: answer.to_be_bytes()[0], ..cpu }, answer)
         }
-        _ => (cpu, 0),
+        _ => (CPUState { ..cpu }, 0),
     };
     let cc = arith_flags(answer);
     let flags = ConditionCodes {
@@ -207,9 +208,9 @@ pub fn dcr_r(cpu: CPUState, r: char) -> CPUState {
     CPUState { cc: flags, pc: cpu.pc + 1, ..inter_cpu }
 }
 
-pub fn inx(cpu: CPUState, rp: (char, char)) -> CPUState {
+pub fn inx(cpu: CPUState, rp: WithSPPairs) -> CPUState {
     match rp {
-        ('b', 'c') => {
+        WithSPPairs::BC => {
             let result =
                 (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_add(1 as u16)).to_be_bytes();
             CPUState {
@@ -220,7 +221,7 @@ pub fn inx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('d', 'e') => {
+        WithSPPairs::DE => {
             let result =
                 (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_add(1 as u16)).to_be_bytes();
             CPUState {
@@ -231,7 +232,7 @@ pub fn inx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('h', 'l') => {
+        WithSPPairs::HL => {
             let result =
                 (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_add(1 as u16)).to_be_bytes();
             CPUState {
@@ -242,19 +243,18 @@ pub fn inx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('s', 'p') => CPUState {
+        WithSPPairs::SP => CPUState {
             sp: cpu.sp.wrapping_add(1 as u16),
             cycles: 1,
             pc: cpu.pc + 1,
             ..cpu
         },
-        _ => cpu,
     }
 }
 
-pub fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
+pub fn dcx(cpu: CPUState, rp: WithSPPairs) -> CPUState {
     match rp {
-        ('b', 'c') => {
+        WithSPPairs::BC => {
             let result =
                 (((cpu.b as u16) << 8 | cpu.c as u16).wrapping_sub(1 as u16)).to_be_bytes();
             CPUState {
@@ -265,7 +265,7 @@ pub fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('d', 'e') => {
+        WithSPPairs::DE => {
             let result =
                 (((cpu.d as u16) << 8 | cpu.e as u16).wrapping_sub(1 as u16)).to_be_bytes();
             CPUState {
@@ -276,7 +276,7 @@ pub fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('h', 'l') => {
+        WithSPPairs::HL => {
             let result =
                 (((cpu.h as u16) << 8 | cpu.l as u16).wrapping_sub(1 as u16)).to_be_bytes();
             CPUState {
@@ -287,13 +287,12 @@ pub fn dcx(cpu: CPUState, rp: (char, char)) -> CPUState {
                 ..cpu
             }
         }
-        ('s', 'p') => CPUState {
+        WithSPPairs::SP => CPUState {
             sp: cpu.sp.wrapping_sub(1 as u16),
             pc: cpu.pc + 1,
             cycles: 1,
             ..cpu
-        },
-        _ => cpu,
+        }
     }
 }
 
