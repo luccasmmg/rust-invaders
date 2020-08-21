@@ -94,7 +94,7 @@ pub fn jpe(cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn jo(cpu: CPUState) -> CPUState {
+pub fn jp(cpu: CPUState) -> CPUState {
     let opcode = &cpu.memory[cpu.pc as usize..];
     let value = if cpu.cc.s == 0 {
         (opcode[2] as u16) << 8 | opcode[1] as u16
@@ -257,7 +257,7 @@ pub fn cp(cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn cnp(cpu: CPUState) -> CPUState {
+pub fn cm(cpu: CPUState) -> CPUState {
     match cpu.cc.s {
         0 => {
             let opcode = &cpu.memory[cpu.pc as usize..];

@@ -5,6 +5,7 @@ use crate::op_data_transfer::*;
 use crate::helpers::get_value_memory;
 use std::fmt;
 use crate::op_logical::*;
+use crate::op_branch::*;
 //use crate::op_special_io::*;
 
 pub const MEMORY_SIZE: usize = 0x4000;
@@ -260,6 +261,52 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         // SUI OPS
         0xd6 => sui(opcode[1], 2, cpu),
         0xde => sui(opcode[1].wrapping_sub(cpu.cc.cy), 2, cpu),
+
+        //JMPS
+        0xc3 => jmp(cpu),
+        0xc2 => jnz(cpu),
+        0xca => jz(cpu),
+        0xe2 => jpo(cpu),
+        0xea => jpe(cpu),
+        0xf2 => jp(cpu),
+        0xfa => jm(cpu),
+        0xd2 => jnc(cpu),
+        0xda => jc(cpu),
+
+        //CALLS
+        0xcd => call(cpu),
+        0xdc => cc(cpu),
+        0xd4 => cnc(cpu),
+        0xcc => cz(cpu),
+        0xc4 => cnz(cpu),
+        0xf4 => cp(cpu),
+        0xfc => cm(cpu),
+        0xec => cpe(cpu),
+        0xe4 => cpo(cpu),
+
+        //Rs
+        0xc9 => ret(cpu),
+        0xd8 => rc(cpu),
+        0xd0 => rnc(cpu),
+        0xc8 => rz(cpu),
+        0xc0 => rnz(cpu),
+        0xf0 => rp(cpu),
+        0xf8 => rm(cpu),
+        0xe8 => rpe(cpu),
+        0xe0 => rpo(cpu),
+
+        //PHCL
+        0xe9 => pchl(cpu),
+
+        //RSTs
+        0xc7 => rst(cpu, 0),
+        0xcf => rst(cpu, 1),
+        0xd7 => rst(cpu, 2),
+        0xdf => rst(cpu, 3),
+        0xe7 => rst(cpu, 4),
+        0xef => rst(cpu, 5),
+        0xf7 => rst(cpu, 6),
+        0xff => rst(cpu, 7),
 
         // ANA OPS
         0xa0 => ana(cpu.b, 1, cpu),
