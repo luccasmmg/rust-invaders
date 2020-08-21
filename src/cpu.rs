@@ -6,7 +6,8 @@ use crate::helpers::get_value_memory;
 use std::fmt;
 use crate::op_logical::*;
 use crate::op_branch::*;
-//use crate::op_special_io::*;
+use crate::op_stack::*;
+use crate::op_special_io::*;
 
 pub const MEMORY_SIZE: usize = 0x4000;
 
@@ -82,7 +83,7 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
     let pc: usize = cpu.pc as usize;
     let opcode = &cpu.memory[pc..];
     match opcode[0] {
-        //         0x00 => (),
+        0x00 => nop(cpu),
         // LXI OPS
         0x01 => lxi(cpu, ('b', 'c')),
         0x11 => lxi(cpu, ('d', 'e')),
@@ -204,7 +205,6 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x73 => mov_m_r(cpu, 'e'),
         0x74 => mov_m_r(cpu, 'h'),
         0x75 => mov_m_r(cpu, 'l'),
-        0x76 => cpu, //TODO
         0x77 => mov_m_r(cpu, 'a'),
         0x78 => mov_r_r('a', cpu.b, cpu),
         0x79 => mov_r_r('a', cpu.c, cpu),
@@ -213,6 +213,23 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x7c => mov_r_r('a', cpu.h, cpu),
         0x7d => mov_r_r('a', cpu.l, cpu),
         0x7e => mov_r_m(cpu, 'a'),
+
+        //PUSH
+        0xc5 => push(cpu, StackPairs::BC),
+        0xd5 => push(cpu, StackPairs::DE),
+        0xe5 => push(cpu, StackPairs::HL),
+        0xf5 => push_psw(cpu),
+
+        //POP
+        0xc1 => pop(cpu, StackPairs::BC),
+        0xd1 => pop(cpu, StackPairs::DE),
+        0xe1 => pop(cpu, StackPairs::HL),
+        0xf1 => pop_psw(cpu),
+
+        //XTHL
+        0xe3 => xthl(cpu),
+        //SPHL
+        0xf9 => sphl(cpu),
 
         // ADD OPS
         0x80 => add(cpu.b, 1, cpu),
@@ -370,6 +387,13 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x3f => cmc(cpu),
         //STC
         0x37 => stc(cpu),
+
+        //IO SPECIAL
+        0xfb => ei(cpu),
+        0xf3 => di(cpu),
+        0x76 => panic!(),
+        0xdb => op_in(cpu),
+        0xd3 => out(cpu),
         _ => cpu,
 
     }
