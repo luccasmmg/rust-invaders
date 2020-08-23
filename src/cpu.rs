@@ -53,7 +53,7 @@ pub struct CPUState {
 }
 
 impl CPUState {
-    fn new() -> CPUState {
+    pub fn new() -> CPUState {
         CPUState {
             a: 0,
             b: 0,
@@ -62,7 +62,7 @@ impl CPUState {
             e: 0,
             h: 0,
             l: 0,
-            sp: 0,
+            sp: 61440,
             pc: 0,
             cycles: 0,
             memory: [0; MEMORY_SIZE],
@@ -70,25 +70,30 @@ impl CPUState {
             int_enable: 0,
         }
     }
+
+    pub fn load_memory(&mut self, rom: &[u8]) {
+        self.memory[..8192].copy_from_slice(rom);
+    }
 }
 
 impl fmt::Display for CPUState {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(f, "Registers -> A: {}, B: {}, C: {}, D: {}, E: {}, H: {}, L: {} \n Flags -> Z: {} S: {} P: {} CY: {} AC: {}",
-                self.a, self.b, self.c, self.d, self.e, self.h, self.l, self.cc.z, self.cc.s, self.cc.p, self.cc.cy, self.cc.ac)
+                write!(f, "Registers -> AF: {:02x}00, BC: {:02x}{:02x}, DE: {:02x}{:02x}, HL: {:02x}{:02x} \n
+Flags -> Z: {:02x} S: {:02x} P: {:02x} CY: {:02x} AC: {:02x}\n
+PC/SP -> PC: {:04x}, SP: {:04x}\n -----------------------------------------------------------------------------------",
+                self.a, self.b, self.c, self.d, self.e, self.h, self.l, self.cc.z, self.cc.s, self.cc.p, self.cc.cy, self.cc.ac, self.pc, self.sp)
         }
 }
 
-fn emulate_8080_op(cpu: CPUState) -> CPUState {
-    let pc: usize = cpu.pc as usize;
-    let opcode = &cpu.memory[pc..];
+pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
+    let opcode = &rom[pc as usize..];
     match opcode[0] {
         0x00 => nop(cpu),
         // LXI OPS
-        0x01 => lxi(cpu, ('b', 'c')),
-        0x11 => lxi(cpu, ('d', 'e')),
-        0x21 => lxi(cpu, ('h', 'l')),
-        0x31 => lxi(cpu, ('s', 'p')),
+        0x01 => lxi(cpu, ('b', 'c'), opcode[1], opcode[2]),
+        0x11 => lxi(cpu, ('d', 'e'), opcode[1], opcode[2]),
+        0x21 => lxi(cpu, ('h', 'l'), opcode[1], opcode[2]),
+        0x31 => lxi(cpu, ('s', 'p'), opcode[1], opcode[2]),
 
         // INX OPS
         0x03 => inx(cpu, WithSPPairs::BC),
@@ -127,14 +132,14 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x35 => dcr_m(cpu),
 
         // MVI
-        0x06 => mvi_r(cpu, 'b'),
-        0x0e => mvi_r(cpu, 'c'),
-        0x16 => mvi_r(cpu, 'd'),
-        0x1e => mvi_r(cpu, 'e'),
-        0x26 => mvi_r(cpu, 'h'),
-        0x2e => mvi_r(cpu, 'l'),
-        0x36 => mvi_m(cpu),
-        0x3e => mvi_r(cpu, 'a'),
+        0x06 => mvi_r(cpu, 'b', opcode[1]),
+        0x0e => mvi_r(cpu, 'c', opcode[1]),
+        0x16 => mvi_r(cpu, 'd', opcode[1]),
+        0x1e => mvi_r(cpu, 'e', opcode[1]),
+        0x26 => mvi_r(cpu, 'h', opcode[1]),
+        0x2e => mvi_r(cpu, 'l', opcode[1]),
+        0x36 => mvi_m(cpu, opcode[1]),
+        0x3e => mvi_r(cpu, 'a', opcode[1]),
 
         // STAX OPS
         0x02 => stax(cpu, ('b', 'c')),
@@ -148,7 +153,7 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x32 => sta(cpu),
 
         // LDA
-        0x3a => lda(cpu),
+        0x3a => lda(cpu, opcode[1], opcode[2]),
 
         // SHLD
         0x22 => shld(cpu),
@@ -280,26 +285,26 @@ fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0xde => sui(opcode[1].wrapping_sub(cpu.cc.cy), 2, cpu),
 
         //JMPS
-        0xc3 => jmp(cpu),
-        0xc2 => jnz(cpu),
-        0xca => jz(cpu),
-        0xe2 => jpo(cpu),
-        0xea => jpe(cpu),
-        0xf2 => jp(cpu),
-        0xfa => jm(cpu),
-        0xd2 => jnc(cpu),
-        0xda => jc(cpu),
+        0xc3 => jmp(cpu, opcode[1], opcode[2]),
+        0xc2 => jnz(cpu, opcode[1], opcode[2]),
+        0xca => jz(cpu, opcode[1], opcode[2]),
+        0xe2 => jpo(cpu, opcode[1], opcode[2]),
+        0xea => jpe(cpu, opcode[1], opcode[2]),
+        0xf2 => jp(cpu, opcode[1], opcode[2]),
+        0xfa => jm(cpu, opcode[1], opcode[2]),
+        0xd2 => jnc(cpu, opcode[1], opcode[2]),
+        0xda => jc(cpu, opcode[1], opcode[2]),
 
         //CALLS
-        0xcd => call(cpu),
-        0xdc => cc(cpu),
-        0xd4 => cnc(cpu),
-        0xcc => cz(cpu),
-        0xc4 => cnz(cpu),
-        0xf4 => cp(cpu),
-        0xfc => cm(cpu),
-        0xec => cpe(cpu),
-        0xe4 => cpo(cpu),
+        0xcd => call(cpu, opcode[1], opcode[2]),
+        0xdc => cc(cpu, opcode[1], opcode[2]),
+        0xd4 => cnc(cpu, opcode[1], opcode[2]),
+        0xcc => cz(cpu, opcode[1], opcode[2]),
+        0xc4 => cnz(cpu, opcode[1], opcode[2]),
+        0xf4 => cp(cpu, opcode[1], opcode[2]),
+        0xfc => cm(cpu, opcode[1], opcode[2]),
+        0xec => cpe(cpu, opcode[1], opcode[2]),
+        0xe4 => cpo(cpu, opcode[1], opcode[2]),
 
         //Rs
         0xc9 => ret(cpu),

@@ -59,9 +59,7 @@ pub fn mov_m_r(cpu: CPUState, r: char) -> CPUState {
     }
 }
 
-pub fn mvi_r(cpu: CPUState, r: char) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
-    let value = opcode[1];
+pub fn mvi_r(cpu: CPUState, r: char, value: u8) -> CPUState {
     let inter_cpu = match r {
         'a' => CPUState { a: value, ..cpu },
         'b' => CPUState { b: value, ..cpu },
@@ -79,9 +77,7 @@ pub fn mvi_r(cpu: CPUState, r: char) -> CPUState {
     }
 }
 
-pub fn mvi_m(cpu: CPUState) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
-    let value = opcode[1];
+pub fn mvi_m(cpu: CPUState, value: u8) -> CPUState {
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let mut memory = cpu.memory;
     memory[address as usize] = value;
@@ -93,32 +89,31 @@ pub fn mvi_m(cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn lxi(cpu: CPUState, rs: (char, char)) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
+pub fn lxi(cpu: CPUState, rs: (char, char), opcode_1: u8, opcode_2: u8) -> CPUState {
     match rs {
         ('b', 'c') => CPUState {
-            b: opcode[2],
-            c: opcode[1],
+            b: opcode_2,
+            c: opcode_1,
             cycles: 3,
             pc: cpu.pc + 3,
             ..cpu
         },
         ('d', 'e') => CPUState {
-            d: opcode[2],
-            e: opcode[1],
+            d: opcode_2,
+            e: opcode_1,
             cycles: 3,
             pc: cpu.pc + 3,
             ..cpu
         },
         ('h', 'l') => CPUState {
-            h: opcode[2],
-            l: opcode[1],
+            h: opcode_2,
+            l: opcode_1,
             cycles: 3,
             pc: cpu.pc + 3,
             ..cpu
         },
         ('s', 'p') => CPUState {
-            sp: ((opcode[2] as u16) << 8 | opcode[1] as u16),
+            sp: ((opcode_2 as u16) << 8 | opcode_1 as u16),
             cycles: 3,
             pc: cpu.pc + 3,
             ..cpu
@@ -127,9 +122,8 @@ pub fn lxi(cpu: CPUState, rs: (char, char)) -> CPUState {
     }
 }
 
-pub fn lda(cpu: CPUState) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
-    let address: u16 = (opcode[2] as u16) << 8 | opcode[1] as u16;
+pub fn lda(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
+    let address: u16 = (opcode_2 as u16) << 8 | opcode_2 as u16;
     CPUState {
         a: cpu.memory[address as usize],
         cycles: 4,
@@ -180,18 +174,17 @@ pub fn shld(cpu: CPUState) -> CPUState {
 }
 
 pub fn ldax(cpu: CPUState, rs: (char, char)) -> CPUState {
-    let value: u8;
-    match rs {
+    let value: u8 = match rs {
         ('b', 'c') => {
             let address: u16 = (cpu.b as u16) << 8 | cpu.c as u16;
-            value = cpu.memory[address as usize];
+            cpu.memory[address as usize]
         }
         ('d', 'e') => {
             let address: u16 = (cpu.d as u16) << 8 | cpu.e as u16;
-            value = cpu.memory[address as usize];
+            cpu.memory[address as usize]
         }
-        _ => value = cpu.a,
-    }
+        _ => cpu.a,
+    };
     CPUState {
         a: value,
         cycles: 2,

@@ -6,7 +6,7 @@ use crate::helpers::arith_flags;
 pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[0];
+    let a = answer.to_le_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -26,7 +26,7 @@ pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn adi(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[0];
+    let a = answer.to_le_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -46,7 +46,7 @@ pub fn adi(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn sub(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[0];
+    let a = answer.to_le_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -66,7 +66,7 @@ pub fn sub(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn sui(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[0];
+    let a = answer.to_le_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -87,31 +87,31 @@ pub fn inr_r(cpu: CPUState, r: char) -> CPUState {
     let (inter_cpu, answer ) = match r {
         'a' => {
             let answer: u16 = (cpu.a as u16).wrapping_add(1 as u16);
-            (CPUState { a: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { a: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'b' => {
             let answer: u16 = (cpu.b as u16).wrapping_add(1 as u16);
-            (CPUState { b: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { b: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'c' => {
             let answer: u16 = (cpu.c as u16).wrapping_add(1 as u16);
-            (CPUState { c: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { c: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'd' => {
             let answer: u16 = (cpu.d as u16).wrapping_add(1 as u16);
-            (CPUState { d: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { d: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'e' => {
             let answer: u16 = (cpu.e as u16).wrapping_add(1 as u16);
-            (CPUState { e: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { e: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'h' => {
             let answer: u16 = (cpu.h as u16).wrapping_add(1 as u16);
-            (CPUState { h: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { h: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'l' => {
             let answer: u16 = (cpu.l as u16).wrapping_add(1 as u16);
-            (CPUState { l: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { l: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         _ => (CPUState { ..cpu }, 0),
     };
@@ -129,7 +129,7 @@ pub fn inr_m(cpu: CPUState) -> CPUState {
     let mut memory = cpu.memory;
     let answer: u16 = (memory[address as usize] as u16).wrapping_add(1 as u16);
     let cc = arith_flags(answer);
-    memory[address as usize] = answer.to_be_bytes()[0];
+    memory[address as usize] = answer.to_be_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -149,7 +149,7 @@ pub fn dcr_m(cpu: CPUState) -> CPUState {
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let mut memory = cpu.memory;
     let answer: u16 = (memory[address as usize] as u16).wrapping_sub(1 as u16);
-    memory[address as usize] = answer.to_be_bytes()[0];
+    memory[address as usize] = answer.to_be_bytes()[1];
     let cc = arith_flags(answer);
     let flags = ConditionCodes {
         z: cc.0,
@@ -170,31 +170,31 @@ pub fn dcr_r(cpu: CPUState, r: char) -> CPUState {
     let (inter_cpu, answer ) = match r {
         'a' => {
             let answer: u16 = (cpu.a as u16).wrapping_sub(1 as u16);
-            (CPUState { a: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { a: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'b' => {
             let answer: u16 = (cpu.b as u16).wrapping_sub(1 as u16);
-            (CPUState { b: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { b: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'c' => {
             let answer: u16 = (cpu.c as u16).wrapping_sub(1 as u16);
-            (CPUState { c: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { c: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'd' => {
             let answer: u16 = (cpu.d as u16).wrapping_sub(1 as u16);
-            (CPUState { d: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { d: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'e' => {
             let answer: u16 = (cpu.e as u16).wrapping_sub(1 as u16);
-            (CPUState { e: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { e: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'h' => {
             let answer: u16 = (cpu.h as u16).wrapping_sub(1 as u16);
-            (CPUState { h: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { h: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         'l' => {
             let answer: u16 = (cpu.l as u16).wrapping_sub(1 as u16);
-            (CPUState { l: answer.to_be_bytes()[0], ..cpu }, answer)
+            (CPUState { l: answer.to_be_bytes()[1], ..cpu }, answer)
         }
         _ => (CPUState { ..cpu }, 0),
     };
