@@ -26,7 +26,7 @@ pub fn hlt() {
 
 pub fn op_in(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 1,
+        pc: cpu.pc + 2,
         cycles: 3,
         ..cpu
     }
@@ -34,7 +34,7 @@ pub fn op_in(cpu: CPUState) -> CPUState {
 
 pub fn out(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 1,
+        pc: cpu.pc + 2,
         cycles: 3,
         ..cpu
     }

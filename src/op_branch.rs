@@ -11,11 +11,10 @@ pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn jnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
     let value = if cpu.cc.z == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -29,7 +28,7 @@ pub fn jz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.z == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -43,7 +42,7 @@ pub fn jnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.cy == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -57,7 +56,7 @@ pub fn jc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.cy == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -71,7 +70,7 @@ pub fn jpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.p == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -85,7 +84,7 @@ pub fn jpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.p == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -99,7 +98,7 @@ pub fn jp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.s == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -113,7 +112,7 @@ pub fn jm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.s == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 2
+        cpu.pc + 3
     };
     CPUState {
         cycles: 3,
@@ -123,8 +122,7 @@ pub fn jm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn call(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
-    let pc = cpu.pc.to_be_bytes();
+    let pc = (cpu.pc + 3).to_be_bytes();
     let mut memory = cpu.memory;
     memory[cpu.sp as usize - 1] = pc[0];
     memory[cpu.sp as usize - 2] = pc[1];
@@ -140,8 +138,7 @@ pub fn call(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 pub fn cc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.cy {
         1 => {
-            let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -155,7 +152,7 @@ pub fn cc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -165,7 +162,7 @@ pub fn cnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.cy {
         0 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -179,7 +176,7 @@ pub fn cnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -189,7 +186,7 @@ pub fn cz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.z {
         1 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -203,7 +200,7 @@ pub fn cz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -213,7 +210,7 @@ pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.z {
         0 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -227,7 +224,7 @@ pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -235,9 +232,8 @@ pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.s {
-        1 => {
-            let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+        0 => {
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -251,7 +247,7 @@ pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -259,9 +255,9 @@ pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.s {
-        0 => {
+        1 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -275,7 +271,7 @@ pub fn cm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -285,7 +281,7 @@ pub fn cpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.p {
         1 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -299,7 +295,7 @@ pub fn cpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
@@ -309,7 +305,7 @@ pub fn cpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.p {
         0 => {
             let opcode = &cpu.memory[cpu.pc as usize..];
-            let pc = cpu.pc.to_be_bytes();
+            let pc = (cpu.pc + 3).to_be_bytes();
             let mut memory = cpu.memory;
             memory[cpu.sp as usize - 1] = pc[0];
             memory[cpu.sp as usize - 2] = pc[1];
@@ -323,30 +319,26 @@ pub fn cpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 2,
+            pc: cpu.pc + 3,
             ..cpu
         },
     }
 }
 
 pub fn ret(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     CPUState {
         cycles: 5,
-        pc: (pch as u16) << 8 | pcl as u16,
+        pc: cpu.memory[cpu.sp as usize] as u16 |( cpu.memory[cpu.sp as usize + 1] as u16) << 8,
         sp: cpu.sp + 2,
         ..cpu
     }
 }
 
 pub fn rc(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.cy {
         1 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -358,12 +350,10 @@ pub fn rc(cpu: CPUState) -> CPUState {
 }
 
 pub fn rnc(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.cy {
         0 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -375,12 +365,10 @@ pub fn rnc(cpu: CPUState) -> CPUState {
 }
 
 pub fn rz(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.z {
         1 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -392,12 +380,10 @@ pub fn rz(cpu: CPUState) -> CPUState {
 }
 
 pub fn rnz(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.z {
         0 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -409,12 +395,10 @@ pub fn rnz(cpu: CPUState) -> CPUState {
 }
 
 pub fn rp(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.s {
         1 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -426,12 +410,10 @@ pub fn rp(cpu: CPUState) -> CPUState {
 }
 
 pub fn rm(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.s {
         0 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -443,12 +425,10 @@ pub fn rm(cpu: CPUState) -> CPUState {
 }
 
 pub fn rpe(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.p {
         1 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {
@@ -460,12 +440,10 @@ pub fn rpe(cpu: CPUState) -> CPUState {
 }
 
 pub fn rpo(cpu: CPUState) -> CPUState {
-    let pcl = cpu.memory[cpu.sp as usize];
-    let pch = cpu.memory[cpu.sp as usize + 1];
     match cpu.cc.p {
         0 => CPUState {
             cycles: 5,
-            pc: (pch as u16) << 8 | pcl as u16,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
         },
         _ => CPUState {

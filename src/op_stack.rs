@@ -29,23 +29,23 @@ pub fn push(cpu: CPUState, rp: StackPairs) -> CPUState {
 }
 
 pub fn pop(cpu: CPUState, rp: StackPairs) -> CPUState {
-    let value_1: u8 = cpu.memory[(cpu.sp + 1) as usize];
-    let value_2: u8 = cpu.memory[cpu.sp as usize];
+    let value_l: u8 = cpu.memory[cpu.sp as usize];
+    let value_h: u8 = cpu.memory[(cpu.sp + 1) as usize];
     let inter_cpu = match rp {
         StackPairs::BC => {
-            CPUState { b: value_1, c: value_2, ..cpu }
+            CPUState { b: value_h, c: value_l, ..cpu }
         }
         StackPairs::DE => {
-            CPUState { d: value_1, e: value_2, ..cpu }
+            CPUState { d: value_h, e: value_l, ..cpu }
         }
         StackPairs::HL => {
-            CPUState { h: value_1, l: value_2, ..cpu }
+            CPUState { h: value_h, l: value_l, ..cpu }
         }
     };
 
     CPUState {
         cycles: 3,
-        sp: cpu.sp - 2,
+        sp: cpu.sp + 2,
         pc: cpu.pc + 1,
         ..inter_cpu
     }

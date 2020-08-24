@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 use crate::condition_codes::ConditionCodes;
 use crate::cpu::CPUState;
-use crate::helpers::arith_flags;
+use crate::helpers::arith_flags_logs;
 
 pub fn ana(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a & value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -25,7 +25,7 @@ pub fn ana(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
 
 pub fn ani(value: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a & value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -45,7 +45,7 @@ pub fn ani(value: u8, cpu: CPUState) -> CPUState {
 
 pub fn xra(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a ^ value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -65,7 +65,7 @@ pub fn xra(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
 
 pub fn xri(value: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a ^ value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -85,7 +85,7 @@ pub fn xri(value: u8, cpu: CPUState) -> CPUState {
 
 pub fn ora(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a | value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -105,7 +105,7 @@ pub fn ora(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
 
 pub fn ori(value: u8, cpu: CPUState) -> CPUState {
     let answer = (cpu.a | value) as u16;
-    let flags_result = arith_flags(answer);
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: flags_result.0,
         s: flags_result.1,
@@ -124,8 +124,8 @@ pub fn ori(value: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn cmp(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
-    let answer = (cpu.a | value) as u16;
-    let flags_result = arith_flags(answer);
+    let answer = ((cpu.a).wrapping_sub(value)) as u16;
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: if answer.to_be_bytes()[1] == cpu.a {
             1
@@ -133,7 +133,7 @@ pub fn cmp(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
             cpu.cc.z
         },
         s: flags_result.1,
-        cy: if answer.to_be_bytes()[1] > cpu.a {
+        cy: if cpu.a < value {
             1
         } else {
             cpu.cc.z
@@ -151,19 +151,19 @@ pub fn cmp(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn cpi(value: u8, cpu: CPUState) -> CPUState {
-    let answer = (cpu.a | value) as u16;
-    let flags_result = arith_flags(answer);
+    let answer = ((cpu.a).wrapping_sub(value)) as u16;
+    let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
-        z: if answer.to_be_bytes()[1] == cpu.a {
+        z: if value == cpu.a {
             1
         } else {
-            cpu.cc.z
+            0
         },
         s: flags_result.1,
-        cy: if answer.to_be_bytes()[1] > cpu.a {
+        cy: if cpu.a < value {
             1
         } else {
-            cpu.cc.z
+            0
         },
         p: flags_result.3,
         ..cpu.cc

@@ -6,8 +6,8 @@ pub fn mov_r_r(r: char, value: u8, cpu: CPUState) -> CPUState {
         'b' => CPUState { b: value, ..cpu },
         'c' => CPUState { c: value, ..cpu },
         'd' => CPUState { d: value, ..cpu },
-        'e' => CPUState { h: value, ..cpu },
-        'h' => CPUState { e: value, ..cpu },
+        'e' => CPUState { e: value, ..cpu },
+        'h' => CPUState { h: value, ..cpu },
         'l' => CPUState { l: value, ..cpu },
         _ => cpu,
     };
@@ -26,8 +26,8 @@ pub fn mov_r_m(cpu: CPUState, r: char) -> CPUState {
         'b' => CPUState { b: value, ..cpu },
         'c' => CPUState { c: value, ..cpu },
         'd' => CPUState { d: value, ..cpu },
-        'e' => CPUState { h: value, ..cpu },
-        'h' => CPUState { e: value, ..cpu },
+        'e' => CPUState { e: value, ..cpu },
+        'h' => CPUState { h: value, ..cpu },
         'l' => CPUState { l: value, ..cpu },
         _ => cpu,
     };
@@ -60,13 +60,14 @@ pub fn mov_m_r(cpu: CPUState, r: char) -> CPUState {
 }
 
 pub fn mvi_r(cpu: CPUState, r: char, value: u8) -> CPUState {
+    println!("{}", value);
     let inter_cpu = match r {
         'a' => CPUState { a: value, ..cpu },
         'b' => CPUState { b: value, ..cpu },
         'c' => CPUState { c: value, ..cpu },
         'd' => CPUState { d: value, ..cpu },
-        'e' => CPUState { h: value, ..cpu },
-        'h' => CPUState { e: value, ..cpu },
+        'e' => CPUState { e: value, ..cpu },
+        'h' => CPUState { h: value, ..cpu },
         'l' => CPUState { l: value, ..cpu },
         _ => cpu,
     };

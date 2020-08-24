@@ -29,6 +29,7 @@ fn main() -> io::Result<()> {
     while n < args[2].parse::<i64>().unwrap() {
         n += 1;
         let pc: u16 = cpu.pc;
+        println!("{:02x}", pc);
         cpu = emulate_8080_op(cpu, &buffer, pc);
         println!("{}", cpu);
     }

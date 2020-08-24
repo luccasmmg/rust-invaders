@@ -86,6 +86,8 @@ PC/SP -> PC: {:04x}, SP: {:04x}\n ----------------------------------------------
 }
 
 pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
+    //println!("{}", cpu.memory[9214]);
+    //println!("{}", cpu.memory[9215]);
     let opcode = &rom[pc as usize..];
     match opcode[0] {
         0x00 => nop(cpu),
