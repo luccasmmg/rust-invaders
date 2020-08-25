@@ -19,7 +19,6 @@ pub fn mov_r_r(r: char, value: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn mov_r_m(cpu: CPUState, r: char) -> CPUState {
-    println!("Mov R M ");
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let value = cpu.memory[address as usize];
     let inter_cpu = match r {
@@ -61,7 +60,6 @@ pub fn mov_m_r(cpu: CPUState, r: char) -> CPUState {
 }
 
 pub fn mvi_r(cpu: CPUState, r: char, value: u8) -> CPUState {
-    println!("{}", value);
     let inter_cpu = match r {
         'a' => CPUState { a: value, ..cpu },
         'b' => CPUState { b: value, ..cpu },

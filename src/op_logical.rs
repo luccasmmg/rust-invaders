@@ -4,7 +4,6 @@ use crate::cpu::CPUState;
 use crate::helpers::arith_flags_logs;
 
 pub fn ana(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
-    println!("{}", (cpu.a & value));
     let answer = (cpu.a & value) as u16;
     let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {

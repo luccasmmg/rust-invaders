@@ -9,7 +9,7 @@ use crate::op_branch::*;
 use crate::op_stack::*;
 use crate::op_special_io::*;
 
-pub const MEMORY_SIZE: usize = 0x4000;
+pub const MEMORY_SIZE: usize = 0xffff;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum StackPairs {
@@ -47,7 +47,7 @@ pub struct CPUState {
     pub sp: u16,
     pub pc: u16,
     pub cycles: u8,
-    pub memory: [u8; MEMORY_SIZE],
+    pub memory: Vec<u8>,
     pub cc: ConditionCodes,
     pub int_enable: u8,
 }
@@ -65,14 +65,14 @@ impl CPUState {
             sp: 61440,
             pc: 0,
             cycles: 0,
-            memory: [0; MEMORY_SIZE],
+            memory: vec![0; MEMORY_SIZE],
             cc: ConditionCodes::new(),
             int_enable: 0,
         }
     }
 
-    pub fn load_memory(&mut self, rom: &[u8]) {
-        self.memory[..8192].copy_from_slice(rom);
+    pub fn load_memory(&mut self, rom: &Vec<u8>, size: usize) {
+        self.memory[..size].copy_from_slice(rom);
     }
 }
 
@@ -86,8 +86,6 @@ PC/SP -> PC: {:04x}, SP: {:04x}\n ----------------------------------------------
 }
 
 pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
-    //println!("{}", cpu.memory[9214]);
-    //println!("{}", cpu.memory[9215]);
     let opcode = &rom[pc as usize..];
     match opcode[0] {
         0x00 => nop(cpu),
@@ -245,7 +243,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x83 => add(cpu.e, 1, cpu),
         0x84 => add(cpu.h, 1, cpu),
         0x85 => add(cpu.l, 1, cpu),
-        0x86 => add(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0x86 => add(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0x87 => add(cpu.a, 1, cpu),
         // ADC OPS
         0x88 => add((cpu.b).wrapping_add(cpu.cc.cy), 2, cpu),
@@ -254,7 +252,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x8b => add((cpu.e).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8c => add((cpu.h).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8d => add((cpu.l).wrapping_add(cpu.cc.cy), 2, cpu),
-        0x8e => add(get_value_memory(cpu.memory, cpu.h, cpu.l).wrapping_add(cpu.cc.cy), 2, cpu),
+        0x8e => add(get_value_memory(&cpu.memory, cpu.h, cpu.l).wrapping_add(cpu.cc.cy), 2, cpu),
         0x8f => add((cpu.a).wrapping_add(cpu.cc.cy), 2, cpu),
 
         // SUB OPS
@@ -264,7 +262,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x93 => sub(cpu.e, 2, cpu),
         0x94 => sub(cpu.h, 2, cpu),
         0x95 => sub(cpu.l, 2, cpu),
-        0x96 => sub(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0x96 => sub(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0x97 => sub(cpu.a, 2, cpu),
 
         // SUBB OPS
@@ -274,7 +272,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x9b => sub((cpu.e).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9c => sub((cpu.h).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9d => sub((cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9e => sub(get_value_memory(cpu.memory, cpu.h, cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
+        0x9e => sub(get_value_memory(&cpu.memory, cpu.h, cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
         0x9f => sub((cpu.a).wrapping_sub(cpu.cc.cy), 1, cpu),
 
         // ADI OPS
@@ -339,7 +337,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xa3 => ana(cpu.e, 1, cpu),
         0xa4 => ana(cpu.h, 1, cpu),
         0xa5 => ana(cpu.l, 1, cpu),
-        0xa6 => ana(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xa6 => ana(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0xa7 => ana(cpu.a, 1, cpu),
 
         // XRA OPS
@@ -349,7 +347,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xab => xra(cpu.e, 1, cpu),
         0xac => xra(cpu.h, 1, cpu),
         0xad => xra(cpu.l, 1, cpu),
-        0xae => xra(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xae => xra(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0xaf => xra(cpu.a, 1, cpu),
 
         // ORA OPS
@@ -359,7 +357,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xb3 => ora(cpu.e, 1, cpu),
         0xb4 => ora(cpu.h, 1, cpu),
         0xb5 => ora(cpu.l, 1, cpu),
-        0xb6 => ora(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xb6 => ora(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0xb7 => ora(cpu.a, 1, cpu),
 
         // CMP OPS
@@ -369,7 +367,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xbb => cmp(cpu.e, 1, cpu),
         0xbc => cmp(cpu.h, 1, cpu),
         0xbd => cmp(cpu.l, 1, cpu),
-        0xbe => cmp(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
+        0xbe => cmp(get_value_memory(&cpu.memory, cpu.h, cpu.l), 2, cpu),
         0xbf => cmp(cpu.a, 1, cpu),
 
         //ANI

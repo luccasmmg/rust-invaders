@@ -10,11 +10,11 @@ pub struct ConditionCodes {
 impl ConditionCodes {
     pub fn new() -> ConditionCodes {
         ConditionCodes {
-            z: 0,
-            s: 0,
-            p: 0,
-            cy: 0,
-            ac: 0,
+            z: 1,
+            s: 1,
+            p: 1,
+            cy: 1,
+            ac: 1,
             pad: 3,
         }
     }
