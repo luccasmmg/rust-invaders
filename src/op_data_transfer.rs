@@ -19,6 +19,7 @@ pub fn mov_r_r(r: char, value: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn mov_r_m(cpu: CPUState, r: char) -> CPUState {
+    println!("Mov R M ");
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let value = cpu.memory[address as usize];
     let inter_cpu = match r {
@@ -124,7 +125,7 @@ pub fn lxi(cpu: CPUState, rs: (char, char), opcode_1: u8, opcode_2: u8) -> CPUSt
 }
 
 pub fn lda(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let address: u16 = (opcode_2 as u16) << 8 | opcode_2 as u16;
+    let address: u16 = (opcode_2 as u16) << 8 | opcode_1 as u16;
     CPUState {
         a: cpu.memory[address as usize],
         cycles: 4,

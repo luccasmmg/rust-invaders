@@ -340,7 +340,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xa4 => ana(cpu.h, 1, cpu),
         0xa5 => ana(cpu.l, 1, cpu),
         0xa6 => ana(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
-        0xa7 => ana(cpu.b, 1, cpu),
+        0xa7 => ana(cpu.a, 1, cpu),
 
         // XRA OPS
         0xa8 => xra(cpu.b, 1, cpu),
@@ -350,7 +350,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xac => xra(cpu.h, 1, cpu),
         0xad => xra(cpu.l, 1, cpu),
         0xae => xra(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
-        0xaf => xra(cpu.b, 1, cpu),
+        0xaf => xra(cpu.a, 1, cpu),
 
         // ORA OPS
         0xb0 => ora(cpu.b, 1, cpu),
@@ -360,7 +360,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xb4 => ora(cpu.h, 1, cpu),
         0xb5 => ora(cpu.l, 1, cpu),
         0xb6 => ora(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
-        0xb7 => ora(cpu.b, 1, cpu),
+        0xb7 => ora(cpu.a, 1, cpu),
 
         // CMP OPS
         0xb8 => cmp(cpu.b, 1, cpu),
@@ -370,7 +370,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0xbc => cmp(cpu.h, 1, cpu),
         0xbd => cmp(cpu.l, 1, cpu),
         0xbe => cmp(get_value_memory(cpu.memory, cpu.h, cpu.l), 2, cpu),
-        0xbf => cmp(cpu.b, 1, cpu),
+        0xbf => cmp(cpu.a, 1, cpu),
 
         //ANI
         0xe6 => ani(opcode[1], cpu),

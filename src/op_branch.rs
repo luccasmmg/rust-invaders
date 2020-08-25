@@ -11,6 +11,7 @@ pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn jnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
+    println!("JNZ");
     let value = if cpu.cc.z == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
@@ -24,7 +25,6 @@ pub fn jnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn jz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let opcode = &cpu.memory[cpu.pc as usize..];
     let value = if cpu.cc.z == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
