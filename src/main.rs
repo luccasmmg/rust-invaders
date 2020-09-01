@@ -27,8 +27,15 @@ fn main() -> io::Result<()> {
     f.read_to_end(&mut buffer)?;
     let buffer = if args[3] == "test" {
         let mut padding = vec![0; 0x100];
+        padding[0] = 0xc3;
+        padding[1] = 0x00;
+        padding[2] = 0x01;
         padding.append(&mut buffer);
-        cpu.pc = 0xff;
+        padding[368] = 0x7;
+        padding[0x59c] = 0xc3;
+        padding[0x59d] = 0xc2;
+        padding[0x59e] = 0x05;
+        cpu.pc = 0x100;
         padding
     } else {
         buffer
@@ -39,7 +46,9 @@ fn main() -> io::Result<()> {
         let pc: u16 = cpu.pc;
         cpu = emulate_8080_op(cpu, &buffer, pc);
         if args[3] == "test" {
-            println!("PC - {:02x}", cpu.pc);
+            disassemble(&buffer[pc as usize..], pc as usize);
+            println!("PC - {:04x}", cpu.pc);
+            println!("{}", cpu);
         } else {
             println!("{}", cpu);
         }

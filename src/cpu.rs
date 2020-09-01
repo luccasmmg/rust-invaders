@@ -282,7 +282,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
 
         // SUI OPS
         0xd6 => sui(opcode[1], 2, cpu),
-        0xde => sui(opcode[1].wrapping_sub(cpu.cc.cy), 2, cpu),
+        0xde => sui(opcode[1].wrapping_add(cpu.cc.cy), 2, cpu),
 
         //JMPS
         0xc3 => jmp(cpu, opcode[1], opcode[2]),

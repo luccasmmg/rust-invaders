@@ -6,7 +6,7 @@ use crate::helpers::arith_flags;
 pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[1];
+    let a = answer as u8;
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -26,7 +26,7 @@ pub fn add(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn adi(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_add(addendum as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[0];
+    let a = answer as u8;
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -46,7 +46,7 @@ pub fn adi(addendum: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn sub(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[1];
+    let a = answer as u8;
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -66,7 +66,6 @@ pub fn sub(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
 pub fn sui(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
     let answer: u16 = (cpu.a as u16).wrapping_sub(subtraend as u16);
     let cc = arith_flags(answer);
-    let a = answer.to_le_bytes()[1];
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -74,6 +73,7 @@ pub fn sui(subtraend: u8, cycles: u8, cpu: CPUState) -> CPUState {
         p: cc.3,
         ..cpu.cc
     };
+    let a = answer as u8;
     CPUState {
         a,
         cc: flags,

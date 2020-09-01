@@ -60,6 +60,7 @@ pub fn mov_m_r(cpu: CPUState, r: char) -> CPUState {
 }
 
 pub fn mvi_r(cpu: CPUState, r: char, value: u8) -> CPUState {
+    println!("{:02x}", value);
     let inter_cpu = match r {
         'a' => CPUState { a: value, ..cpu },
         'b' => CPUState { b: value, ..cpu },

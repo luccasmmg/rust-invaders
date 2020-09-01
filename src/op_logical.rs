@@ -151,7 +151,7 @@ pub fn cmp(value: u8, cycles: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn cpi(value: u8, cpu: CPUState) -> CPUState {
-    let answer = ((cpu.a).wrapping_sub(value)) as u16;
+    let answer = (cpu.a as u16).wrapping_sub(value as u16);
     let flags_result = arith_flags_logs(answer);
     let flags = ConditionCodes {
         z: if value == cpu.a {
