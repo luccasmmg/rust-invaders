@@ -396,7 +396,7 @@ pub fn rnz(cpu: CPUState) -> CPUState {
 
 pub fn rp(cpu: CPUState) -> CPUState {
     match cpu.cc.s {
-        1 => CPUState {
+        0 => CPUState {
             cycles: 5,
             pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
             ..cpu
@@ -411,6 +411,21 @@ pub fn rp(cpu: CPUState) -> CPUState {
 
 pub fn rm(cpu: CPUState) -> CPUState {
     match cpu.cc.s {
+        1 => CPUState {
+            cycles: 5,
+            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
+            ..cpu
+        },
+        _ => CPUState {
+            cycles: 3,
+            pc: cpu.pc + 1,
+            ..cpu
+        },
+    }
+}
+
+pub fn rpo(cpu: CPUState) -> CPUState {
+    match cpu.cc.p {
         0 => CPUState {
             cycles: 5,
             pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
@@ -439,20 +454,6 @@ pub fn rpe(cpu: CPUState) -> CPUState {
     }
 }
 
-pub fn rpo(cpu: CPUState) -> CPUState {
-    match cpu.cc.p {
-        0 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
-        _ => CPUState {
-            cycles: 3,
-            pc: cpu.pc + 1,
-            ..cpu
-        },
-    }
-}
 
 pub fn pchl(cpu: CPUState) -> CPUState {
     CPUState {

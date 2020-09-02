@@ -3,6 +3,7 @@ pub fn parity(byte: u16) -> u16 {
     y ^= y >> 4;
     y ^= y >> 2;
     y ^= y >> 1;
+    println!("{}", ((!y) & 1));
     (!y) & 1
 }
 
@@ -11,7 +12,7 @@ pub fn arith_flags(answer: u16) -> (u8, u8, u8, u8) {
     let cy = if answer > 0xff { 1 } else { 0 };
     let z = if answer & 0xff == 0 { 1 } else { 0 };
     let s = if answer & 0x80 == 0x80 { 1 } else { 0 };
-    let p = if parity(answer & 0xff) == 1 { 1 } else { 0 };
+    let p = if parity(answer) == 1 { 1 } else { 0 };
     (z, s, cy, p)
 }
 
@@ -19,7 +20,7 @@ pub fn arith_flags_logs(answer: u16) -> (u8, u8, u8, u8) {
     let cy = if answer > 0xff { 1 } else { 0 };
     let z = if answer == 0 { 1 } else { 0 };
     let s = if answer & (1 << 7) != 0 { 1 } else { 0 };
-    let p = if parity(answer & 0xff) == 1 { 1 } else { 0 };
+    let p = if parity(answer) == 1 { 1 } else { 0 };
     (z, s, cy, p)
 }
 

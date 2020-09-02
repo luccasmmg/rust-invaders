@@ -31,6 +31,7 @@ pub fn ani(value: u8, cpu: CPUState) -> CPUState {
         s: flags_result.1,
         cy: 0,
         p: flags_result.3,
+        ac: 0,
         ..cpu.cc
     };
 

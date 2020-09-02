@@ -79,9 +79,9 @@ impl CPUState {
 impl fmt::Display for CPUState {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "Registers -> AF: {:02x}00, BC: {:02x}{:02x}, DE: {:02x}{:02x}, HL: {:02x}{:02x} \n
-Flags -> Z: {:02x} S: {:02x} P: {:02x} CY: {:02x} AC: {:02x}\n
+Flags -> Z: {:02x} S: {:02x} P: {:02x} CY: {:02x}\n
 PC/SP -> PC: {:04x}, SP: {:04x}\n -----------------------------------------------------------------------------------",
-                self.a, self.b, self.c, self.d, self.e, self.h, self.l, self.cc.z, self.cc.s, self.cc.p, self.cc.cy, self.cc.ac, self.pc, self.sp)
+                self.a, self.b, self.c, self.d, self.e, self.h, self.l, self.cc.z, self.cc.s, self.cc.p, self.cc.cy, self.pc, self.sp)
         }
 }
 
