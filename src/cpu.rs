@@ -114,6 +114,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x39 => dad(cpu, ('s', 'p')),
 
         // INR OPS
+        0x3c => inr_r(cpu, 'a'),
         0x04 => inr_r(cpu, 'b'),
         0x0c => inr_r(cpu, 'c'),
         0x14 => inr_r(cpu, 'd'),
@@ -123,6 +124,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x34 => inr_m(cpu),
 
         // DCR OPS
+        0x3d => dcr_r(cpu, 'a'),
         0x05 => dcr_r(cpu, 'b'),
         0x0d => dcr_r(cpu, 'c'),
         0x15 => dcr_r(cpu, 'd'),

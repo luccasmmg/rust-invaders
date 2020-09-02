@@ -14,8 +14,8 @@ impl ConditionCodes {
             s: 1,
             p: 1,
             cy: 1,
-            ac: 1,
-            pad: 3,
+            ac: 0,
+            pad: 1,
         }
     }
 }

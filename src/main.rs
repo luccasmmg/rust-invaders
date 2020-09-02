@@ -31,10 +31,14 @@ fn main() -> io::Result<()> {
         padding[1] = 0x00;
         padding[2] = 0x01;
         padding.append(&mut buffer);
-        padding[368] = 0x7;
+        //padding[368] = 0x7;
         padding[0x59c] = 0xc3;
         padding[0x59d] = 0xc2;
         padding[0x59e] = 0x05;
+        padding[0x319] = 0x00;
+        padding[0x31a] = 0x00;
+        padding[0x31b] = 0x00;
+        padding[0x31c] = 0x00;
         cpu.pc = 0x100;
         padding
     } else {

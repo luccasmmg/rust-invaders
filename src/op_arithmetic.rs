@@ -87,33 +87,33 @@ pub fn inr_r(cpu: CPUState, r: char) -> CPUState {
     let (inter_cpu, answer ) = match r {
         'a' => {
             let answer: u16 = (cpu.a as u16).wrapping_add(1 as u16);
-            (CPUState { a: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { a: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'b' => {
             let answer: u16 = (cpu.b as u16).wrapping_add(1 as u16);
-            (CPUState { b: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { b: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
         'c' => {
             let answer: u16 = (cpu.c as u16).wrapping_add(1 as u16);
-            (CPUState { c: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { c: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
         'd' => {
             let answer: u16 = (cpu.d as u16).wrapping_add(1 as u16);
-            (CPUState { d: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { d: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
         'e' => {
             let answer: u16 = (cpu.e as u16).wrapping_add(1 as u16);
-            (CPUState { e: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { e: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
         'h' => {
             let answer: u16 = (cpu.h as u16).wrapping_add(1 as u16);
-            (CPUState { h: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { h: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
         'l' => {
             let answer: u16 = (cpu.l as u16).wrapping_add(1 as u16);
-            (CPUState { l: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { l: answer as u8, pc: cpu.pc + 1,  ..cpu }, answer)
         }
-        _ => (CPUState { ..cpu }, 0),
+        _ => (CPUState {pc: cpu.pc + 1,  ..cpu }, 0),
     };
     let cc = arith_flags(answer);
     let flags = ConditionCodes {
@@ -170,31 +170,31 @@ pub fn dcr_r(cpu: CPUState, r: char) -> CPUState {
     let (inter_cpu, answer ) = match r {
         'a' => {
             let answer: u16 = (cpu.a as u16).wrapping_sub(1 as u16);
-            (CPUState { a: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { a: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'b' => {
             let answer: u16 = (cpu.b as u16).wrapping_sub(1 as u16);
-            (CPUState { b: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { b: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'c' => {
             let answer: u16 = (cpu.c as u16).wrapping_sub(1 as u16);
-            (CPUState { c: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { c: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'd' => {
             let answer: u16 = (cpu.d as u16).wrapping_sub(1 as u16);
-            (CPUState { d: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { d: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'e' => {
             let answer: u16 = (cpu.e as u16).wrapping_sub(1 as u16);
-            (CPUState { e: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { e: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'h' => {
             let answer: u16 = (cpu.h as u16).wrapping_sub(1 as u16);
-            (CPUState { h: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { h: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         'l' => {
             let answer: u16 = (cpu.l as u16).wrapping_sub(1 as u16);
-            (CPUState { l: answer.to_be_bytes()[1], ..cpu }, answer)
+            (CPUState { l: answer as u8, pc: cpu.pc + 1, ..cpu }, answer)
         }
         _ => (CPUState { ..cpu }, 0),
     };

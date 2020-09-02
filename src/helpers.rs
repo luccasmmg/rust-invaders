@@ -18,7 +18,7 @@ pub fn arith_flags(answer: u16) -> (u8, u8, u8, u8) {
 
 pub fn arith_flags_logs(answer: u16) -> (u8, u8, u8, u8) {
     let cy = if answer > 0xff { 1 } else { 0 };
-    let z = if answer == 0 { 1 } else { 0 };
+    let z = if answer & 0xff == 0 { 1 } else { 0 };
     let s = if answer & (1 << 7) != 0 { 1 } else { 0 };
     let p = if parity(answer) == 1 { 1 } else { 0 };
     (z, s, cy, p)
