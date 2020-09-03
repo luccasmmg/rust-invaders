@@ -170,7 +170,7 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x44 => mov_r_r('b', cpu.h, cpu),
         0x45 => mov_r_r('b', cpu.l, cpu),
         0x46 => mov_r_m(cpu, 'b'),
-        0x47 => mov_r_r('a', cpu.a, cpu),
+        0x47 => mov_r_r('b', cpu.a, cpu),
         0x48 => mov_r_r('c', cpu.b, cpu),
         0x4a => mov_r_r('c', cpu.d, cpu),
         0x4b => mov_r_r('c', cpu.e, cpu),
@@ -268,14 +268,14 @@ pub fn emulate_8080_op(cpu: CPUState, rom: &[u8], pc: u16) -> CPUState {
         0x97 => sub(cpu.a, 2, cpu),
 
         // SUBB OPS
-        0x98 => sub((cpu.b).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x99 => sub((cpu.c).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9a => sub((cpu.d).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9b => sub((cpu.e).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9c => sub((cpu.h).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9d => sub((cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9e => sub(get_value_memory(&cpu.memory, cpu.h, cpu.l).wrapping_sub(cpu.cc.cy), 1, cpu),
-        0x9f => sub((cpu.a).wrapping_sub(cpu.cc.cy), 1, cpu),
+        0x98 => sub((cpu.b).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x99 => sub((cpu.c).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9a => sub((cpu.d).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9b => sub((cpu.e).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9c => sub((cpu.h).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9d => sub((cpu.l).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9e => sub(get_value_memory(&cpu.memory, cpu.h, cpu.l).wrapping_add(cpu.cc.cy), 1, cpu),
+        0x9f => sub((cpu.a).wrapping_add(cpu.cc.cy), 1, cpu),
 
         // ADI OPS
         0xc6 => adi(opcode[1], 2, cpu),

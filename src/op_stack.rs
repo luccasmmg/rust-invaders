@@ -1,6 +1,7 @@
 use crate::cpu::CPUState;
 use crate::condition_codes::ConditionCodes;
 use crate::cpu::StackPairs;
+use crate::helpers::write_memory;
 
 pub fn push(cpu: CPUState, rp: StackPairs) -> CPUState {
     let mut memory = cpu.memory;
@@ -87,11 +88,16 @@ pub fn pop_psw(cpu: CPUState) -> CPUState {
 }
 
 pub fn xthl(cpu: CPUState) -> CPUState {
+    let l = cpu.memory[cpu.sp as usize];
+    let h = cpu.memory[(cpu.sp + 1) as usize];
+    let mut memory = write_memory(cpu.memory, cpu.sp, cpu.l);
+    memory = write_memory(memory, cpu.sp + 1, cpu.h);
     CPUState {
-        h: cpu.memory[(cpu.sp + 1) as usize],
-        l: cpu.memory[cpu.sp as usize],
+        l,
+        h,
         cycles: 3,
         pc: cpu.pc + 1,
+        memory,
         ..cpu
     }
 }

@@ -129,7 +129,7 @@ pub fn inr_m(cpu: CPUState) -> CPUState {
     let mut memory = cpu.memory;
     let answer: u16 = (memory[address as usize] as u16).wrapping_add(1 as u16);
     let cc = arith_flags(answer);
-    memory[address as usize] = answer.to_be_bytes()[1];
+    memory[address as usize] = answer as u8;
     let flags = ConditionCodes {
         z: cc.0,
         s: cc.1,
@@ -139,7 +139,7 @@ pub fn inr_m(cpu: CPUState) -> CPUState {
     CPUState {
         memory,
         cc: flags,
-        pc: cpu.pc + 3,
+        pc: cpu.pc + 1,
         cycles: 3,
         ..cpu
     }
@@ -149,7 +149,7 @@ pub fn dcr_m(cpu: CPUState) -> CPUState {
     let address: u16 = (cpu.h as u16) << 8 | cpu.l as u16;
     let mut memory = cpu.memory;
     let answer: u16 = (memory[address as usize] as u16).wrapping_sub(1 as u16);
-    memory[address as usize] = answer.to_be_bytes()[1];
+    memory[address as usize] = answer as u8;
     let cc = arith_flags(answer);
     let flags = ConditionCodes {
         z: cc.0,

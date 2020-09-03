@@ -179,49 +179,53 @@ pub fn cpi(value: u8, cpu: CPUState) -> CPUState {
 }
 
 pub fn rlc(cpu: CPUState) -> CPUState {
-    let answer = ((cpu.a & 0x80) >> 7) | (cpu.a << 1);
-    let cy = if 0x80 == answer & 0x80 { 1 } else { 0 };
+    let bit7: u8 = cpu.a & (1 << 7);
+    let mut answer: u8 = cpu.a << 1;
+    answer |= bit7 >> 7;
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc },
+        cc: ConditionCodes { cy: bit7, ..cpu.cc },
         ..cpu
     }
 }
 
 pub fn rrc(cpu: CPUState) -> CPUState {
-    let answer = ((cpu.a & 1) << 7) | (cpu.a >> 1);
-    let cy = if 1 == answer & 1 { 1 } else { 0 };
+    let bit0: u8 = cpu.a & 1;
+    let mut answer = cpu.a >> 1;
+    answer |= bit0 << 7;
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc },
+        cc: ConditionCodes { cy: bit0, ..cpu.cc },
         ..cpu
     }
 }
 
 pub fn rar(cpu: CPUState) -> CPUState {
-    let answer = (cpu.cc.cy << 7) | (cpu.a >> 1);
-    let cy = if 1 == answer & 1 { 1 } else { 0 };
+    let bit0: u8 = cpu.a & 1;
+    let mut answer = cpu.a >> 1;
+    if cpu.cc.cy == 1 { answer |= 1 << 7; }
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc },
+        cc: ConditionCodes { cy: bit0, ..cpu.cc },
         ..cpu
     }
 }
 
 pub fn ral(cpu: CPUState) -> CPUState {
-    let answer = cpu.cc.cy | cpu.a << 1;
-    let cy = if 0x80 == (answer & 0x80) { 1 } else { 0 };
+    let bit7: u8 = cpu.a & (1 << 7);
+    let mut answer = cpu.a << 1;
+    answer |= cpu.cc.cy;
     CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy, ..cpu.cc },
+        cc: ConditionCodes { cy: bit7, ..cpu.cc },
         ..cpu
     }
 }

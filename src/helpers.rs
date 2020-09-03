@@ -28,3 +28,8 @@ pub fn get_value_memory(memory: &Vec<u8>, hr: u8, lr: u8) -> u8 {
     let address: u16 = (hr as u16) << 8 | lr as u16;
     memory[address as usize]
 }
+
+pub fn write_memory(mut memory: Vec<u8>, address: u16, value: u8) -> Vec<u8> {
+    memory[address as usize] = value;
+    memory
+}
