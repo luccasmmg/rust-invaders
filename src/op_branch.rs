@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 use crate::cpu::CPUState;
-use std::process::exit;
-use std::str;
 
 pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     CPUState {

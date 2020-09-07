@@ -1,9 +1,21 @@
+use std::fs::File;
+use crate::cpu::CPUState;
+use std::io::Read;
+
+pub fn load_memory(filename: &str) -> (CPUState, Vec<u8>) {
+    let mut buffer = Vec::new();
+    let mut f = File::open(filename).unwrap();
+    let mut cpu = CPUState::new();
+    f.read_to_end(&mut buffer).unwrap();
+    cpu.load_memory(&buffer, buffer.len());
+    (cpu, buffer)
+}
+
 pub fn parity(byte: u16) -> u16 {
     let mut y = byte;
     y ^= y >> 4;
     y ^= y >> 2;
     y ^= y >> 1;
-    println!("{}", ((!y) & 1));
     (!y) & 1
 }
 
