@@ -398,8 +398,6 @@ pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
         0xfb => ei(cpu),
         0xf3 => di(cpu),
         0x76 => panic!(),
-        0xdb => op_in(cpu),
-        0xd3 => out(cpu),
         _ => cpu,
 
     }

@@ -1,14 +1,14 @@
 use std::fs::File;
-use crate::cpu::CPUState;
+use crate::invaders::Machine;
 use std::io::Read;
 
-pub fn load_memory(filename: &str) -> (CPUState, Vec<u8>) {
+pub fn new_machine() -> (Machine, Vec<u8>) {
     let mut buffer = Vec::new();
-    let mut f = File::open(filename).unwrap();
-    let mut cpu = CPUState::new();
+    let mut f = File::open("invaders").unwrap();
     f.read_to_end(&mut buffer).unwrap();
-    cpu.load_memory(&buffer, buffer.len());
-    (cpu, buffer)
+    let mut machine = Machine::new();
+    machine.load_memory(&buffer, buffer.len());
+    (machine , buffer)
 }
 
 pub fn parity(byte: u16) -> u16 {

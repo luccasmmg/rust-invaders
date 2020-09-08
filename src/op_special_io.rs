@@ -24,8 +24,9 @@ pub fn hlt() {
     process::exit(0);
 }
 
-pub fn op_in(cpu: CPUState) -> CPUState {
+pub fn op_in(cpu: CPUState, value: u8) -> CPUState {
     CPUState {
+        a: value,
         pc: cpu.pc + 2,
         cycles: 3,
         ..cpu
