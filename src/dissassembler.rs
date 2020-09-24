@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub fn disassemble(buffer: &[u8], pc: usize) -> usize {
     print!("{:04x}\t", pc);
     match buffer[0] {
