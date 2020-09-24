@@ -8,10 +8,14 @@ pub struct Machine {
     pub next_interrupt: u64,
     pub which_interrupt: usize,
 
-    pub shift0: u8,
+    pub shift0: u8, //REGISTER PAIR ACTUALLY
     pub shift1: u8,
-    pub shift_offset: u8,
+    pub shift_offset: u8, //SHIFT AMOUNT
     pub out_bus: u8,
+
+    pub port0: u8,
+    pub port1: u8,
+    pub port2: u8,
 }
 
 impl Machine {
@@ -25,6 +29,10 @@ impl Machine {
             shift1: 0,
             shift_offset: 0,
             out_bus: 0,
+
+            port0: 0b0111_0000,
+            port1: 0b0001_0000,
+            port2: 0b0000_0000,
         }
     }
 
