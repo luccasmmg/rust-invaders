@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub struct ConditionCodes {
     pub z: u8,
     pub s: u8,

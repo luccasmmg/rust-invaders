@@ -36,6 +36,7 @@ pub enum Registers {
     L,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct CPUState {
     pub a: u8,
     pub b: u8,
