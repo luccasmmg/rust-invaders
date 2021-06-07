@@ -50,7 +50,7 @@ pub struct CPUState {
     pub cycles: u8,
     pub memory: Vec<u8>,
     pub cc: ConditionCodes,
-    pub int_enable: u8,
+    pub int_enable: bool,
 }
 
 impl CPUState {
@@ -68,7 +68,7 @@ impl CPUState {
             cycles: 0,
             memory: vec![0; MEMORY_SIZE],
             cc: ConditionCodes::new(),
-            int_enable: 0,
+            int_enable: false,
         }
     }
 

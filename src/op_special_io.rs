@@ -5,7 +5,7 @@ use crate::cpu::CPUState;
 pub fn ei(cpu: CPUState) -> CPUState {
     CPUState {
         pc: cpu.pc + 1,
-        int_enable: 1,
+        int_enable: true,
         cycles: 1,
         ..cpu
     }
@@ -14,7 +14,7 @@ pub fn ei(cpu: CPUState) -> CPUState {
 pub fn di(cpu: CPUState) -> CPUState {
     CPUState {
         pc: cpu.pc + 1,
-        int_enable: 0,
+        int_enable: false,
         cycles: 1,
         ..cpu
     }

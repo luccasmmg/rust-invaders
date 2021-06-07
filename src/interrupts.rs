@@ -12,11 +12,15 @@ pub fn handle_interrupts(machine: Machine, opcode: &[u8]) -> Machine {
 
 fn in_space_invaders(machine: Machine, port: u8) -> Machine {
     match port {
+        0 => Machine { cpu: op_in(machine.cpu, 0xf), ..machine },
+        1 => Machine { cpu: op_in(machine.cpu, machine.in_port1), ..machine },
+        2 => Machine { cpu: op_in(machine.cpu, machine.in_port2), ..machine },
         3 => {
-            let value = (machine.shift_value >> (8 - machine.shift_offset)) as u8;
+            let v = ((machine.shift1 as u16) << 8) | (machine.shift0 as u16);
+            let value = (v >> (8-(machine.shift_offset as u16))) as u8;
             Machine { cpu: op_in(machine.cpu, value), ..machine }
         }
-        _ => Machine { cpu: op_in(machine.cpu, machine.ports[port as usize]), ..machine }
+        _ => Machine { cpu: op_in(machine.cpu, 0), ..machine }
     }
 }
 
@@ -24,19 +28,21 @@ fn out_space_invaders(machine: Machine, port: u8) -> Machine {
     let value = machine.cpu.a;
     match port {
         2 => {
-            Machine { shift_offset: value & 0x7, ..machine}
+            Machine { cpu: CPUState { pc: machine.cpu.pc + 1, ..machine.cpu },
+                      shift_offset: value & 0x7,
+                      ..machine}
         },
         4 => {
             Machine {
-                shift_value: (machine.shift_value >> 8 | u16::from(value) << 8),
+                shift0: machine.shift1,
+                shift1: value,
+                cpu: CPUState { pc: machine.cpu.pc + 1, ..machine.cpu },
                 ..machine
             }
         },
-        6 => machine,
+        6 => Machine { cpu: CPUState { pc: machine.cpu.pc + 1, ..machine.cpu }, ..machine},
         _ => {
-            let mut new_ports = machine.ports;
-            new_ports[port as usize] = value;
-            Machine { cpu: CPUState { pc: machine.cpu.pc + 1, ..machine.cpu }, ports: new_ports, ..machine}
+            Machine { cpu: CPUState { pc: machine.cpu.pc + 1, ..machine.cpu }, ..machine}
         }
     }
 }
