@@ -13,7 +13,7 @@ pub fn jnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.z == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -26,7 +26,7 @@ pub fn jz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.z == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -39,7 +39,7 @@ pub fn jnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.cy == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -52,7 +52,7 @@ pub fn jc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.cy == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -65,7 +65,7 @@ pub fn jpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.p == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -78,7 +78,7 @@ pub fn jpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.p == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -91,7 +91,7 @@ pub fn jp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.s == 0 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -104,7 +104,7 @@ pub fn jm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     let value = if cpu.cc.s == 1 {
         (opcode_2 as u16) << 8 | opcode_1 as u16
     } else {
-        cpu.pc + 3
+        cpu.pc.wrapping_add(3)
     };
     CPUState {
         cycles: 3,
@@ -126,7 +126,7 @@ pub fn call(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
        println!("Finished");
        panic!()
     };
-    let pc = (cpu.pc + 3).to_be_bytes();
+    let pc = (cpu.pc.wrapping_add(3)).to_be_bytes();
     let mut memory = cpu.memory;
     memory[cpu.sp as usize - 1] = pc[0];
     memory[cpu.sp as usize - 2] = pc[1];
@@ -156,7 +156,7 @@ pub fn cc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -179,7 +179,7 @@ pub fn cnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -202,7 +202,7 @@ pub fn cz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -225,7 +225,7 @@ pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -248,7 +248,7 @@ pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -271,7 +271,7 @@ pub fn cm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -294,7 +294,7 @@ pub fn cpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -317,7 +317,7 @@ pub fn cpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
         }
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
     }
@@ -341,7 +341,7 @@ pub fn rc(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -356,7 +356,7 @@ pub fn rnc(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -371,7 +371,7 @@ pub fn rz(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -386,7 +386,7 @@ pub fn rnz(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -401,7 +401,7 @@ pub fn rp(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -416,7 +416,7 @@ pub fn rm(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -431,7 +431,7 @@ pub fn rpo(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -446,7 +446,7 @@ pub fn rpe(cpu: CPUState) -> CPUState {
         },
         _ => CPUState {
             cycles: 3,
-            pc: cpu.pc + 1,
+            pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
     }
@@ -470,7 +470,7 @@ pub fn rst(cpu: CPUState, n: u8) -> CPUState {
         0..=7 => CPUState {
             cycles: 3,
             pc: (8 * n) as u16,
-            sp: cpu.sp - 2,
+            sp: cpu.sp.wrapping_sub(2),
             memory,
             ..cpu
         },

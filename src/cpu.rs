@@ -9,7 +9,7 @@ use crate::op_branch::*;
 use crate::op_stack::*;
 use crate::op_special_io::*;
 
-pub const MEMORY_SIZE: usize = 0xffff;
+pub const MEMORY_SIZE: usize = 0x10000;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum StackPairs {
@@ -86,14 +86,17 @@ PC/SP -> PC: {:04x}, SP: {:04x}\n ----------------------------------------------
         }
 }
 
-pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
-    match opcode[0] {
+pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
+    let opcode: u8 = cpu.memory[cpu.pc as usize];
+    let next_opcode: u8 = cpu.memory[cpu.pc.wrapping_add(1) as usize];
+    let next_next_opcode: u8 = cpu.memory[cpu.pc.wrapping_add(2) as usize];
+    match opcode {
         0x00 => nop(cpu),
         // LXI OPS
-        0x01 => lxi(cpu, ('b', 'c'), opcode[1], opcode[2]),
-        0x11 => lxi(cpu, ('d', 'e'), opcode[1], opcode[2]),
-        0x21 => lxi(cpu, ('h', 'l'), opcode[1], opcode[2]),
-        0x31 => lxi(cpu, ('s', 'p'), opcode[1], opcode[2]),
+        0x01 => lxi(cpu, ('b', 'c'), next_opcode, next_next_opcode),
+        0x11 => lxi(cpu, ('d', 'e'), next_opcode, next_next_opcode),
+        0x21 => lxi(cpu, ('h', 'l'), next_opcode, next_next_opcode),
+        0x31 => lxi(cpu, ('s', 'p'), next_opcode, next_next_opcode),
 
         // INX OPS
         0x03 => inx(cpu, WithSPPairs::BC),
@@ -134,14 +137,14 @@ pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
         0x35 => dcr_m(cpu),
 
         // MVI
-        0x06 => mvi_r(cpu, 'b', opcode[1]),
-        0x0e => mvi_r(cpu, 'c', opcode[1]),
-        0x16 => mvi_r(cpu, 'd', opcode[1]),
-        0x1e => mvi_r(cpu, 'e', opcode[1]),
-        0x26 => mvi_r(cpu, 'h', opcode[1]),
-        0x2e => mvi_r(cpu, 'l', opcode[1]),
-        0x36 => mvi_m(cpu, opcode[1]),
-        0x3e => mvi_r(cpu, 'a', opcode[1]),
+        0x06 => mvi_r(cpu, 'b', next_opcode),
+        0x0e => mvi_r(cpu, 'c', next_opcode),
+        0x16 => mvi_r(cpu, 'd', next_opcode),
+        0x1e => mvi_r(cpu, 'e', next_opcode),
+        0x26 => mvi_r(cpu, 'h', next_opcode),
+        0x2e => mvi_r(cpu, 'l', next_opcode),
+        0x36 => mvi_m(cpu, next_opcode),
+        0x3e => mvi_r(cpu, 'a', next_opcode),
 
         // STAX OPS
         0x02 => stax(cpu, ('b', 'c')),
@@ -155,7 +158,7 @@ pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
         0x32 => sta(cpu),
 
         // LDA
-        0x3a => lda(cpu, opcode[1], opcode[2]),
+        0x3a => lda(cpu, next_opcode, next_next_opcode),
 
         // SHLD
         0x22 => shld(cpu),
@@ -278,35 +281,35 @@ pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
         0x9f => sub((cpu.a).wrapping_add(cpu.cc.cy), 1, cpu),
 
         // ADI OPS
-        0xc6 => adi(opcode[1], 2, cpu),
-        0xce => adi(opcode[1].wrapping_add(cpu.cc.cy), 2, cpu),
+        0xc6 => adi(next_opcode, 2, cpu),
+        0xce => adi(next_opcode.wrapping_add(cpu.cc.cy), 2, cpu),
         0xeb => xchg(cpu),
 
         // SUI OPS
-        0xd6 => sui(opcode[1], 2, cpu),
-        0xde => sui(opcode[1].wrapping_add(cpu.cc.cy), 2, cpu),
+        0xd6 => sui(next_opcode, 2, cpu),
+        0xde => sui(next_opcode.wrapping_add(cpu.cc.cy), 2, cpu),
 
         //JMPS
-        0xc3 => jmp(cpu, opcode[1], opcode[2]),
-        0xc2 => jnz(cpu, opcode[1], opcode[2]),
-        0xca => jz(cpu, opcode[1], opcode[2]),
-        0xe2 => jpo(cpu, opcode[1], opcode[2]),
-        0xea => jpe(cpu, opcode[1], opcode[2]),
-        0xf2 => jp(cpu, opcode[1], opcode[2]),
-        0xfa => jm(cpu, opcode[1], opcode[2]),
-        0xd2 => jnc(cpu, opcode[1], opcode[2]),
-        0xda => jc(cpu, opcode[1], opcode[2]),
+        0xc3 => jmp(cpu, next_opcode, next_next_opcode),
+        0xc2 => jnz(cpu, next_opcode, next_next_opcode),
+        0xca => jz(cpu, next_opcode, next_next_opcode),
+        0xe2 => jpo(cpu, next_opcode, next_next_opcode),
+        0xea => jpe(cpu, next_opcode, next_next_opcode),
+        0xf2 => jp(cpu, next_opcode, next_next_opcode),
+        0xfa => jm(cpu, next_opcode, next_next_opcode),
+        0xd2 => jnc(cpu, next_opcode, next_next_opcode),
+        0xda => jc(cpu, next_opcode, next_next_opcode),
 
         //CALLS
-        0xcd => call(cpu, opcode[1], opcode[2]),
-        0xdc => cc(cpu, opcode[1], opcode[2]),
-        0xd4 => cnc(cpu, opcode[1], opcode[2]),
-        0xcc => cz(cpu, opcode[1], opcode[2]),
-        0xc4 => cnz(cpu, opcode[1], opcode[2]),
-        0xf4 => cp(cpu, opcode[1], opcode[2]),
-        0xfc => cm(cpu, opcode[1], opcode[2]),
-        0xec => cpe(cpu, opcode[1], opcode[2]),
-        0xe4 => cpo(cpu, opcode[1], opcode[2]),
+        0xcd => call(cpu, next_opcode, next_next_opcode),
+        0xdc => cc(cpu, next_opcode, next_next_opcode),
+        0xd4 => cnc(cpu, next_opcode, next_next_opcode),
+        0xcc => cz(cpu, next_opcode, next_next_opcode),
+        0xc4 => cnz(cpu, next_opcode, next_next_opcode),
+        0xf4 => cp(cpu, next_opcode, next_next_opcode),
+        0xfc => cm(cpu, next_opcode, next_next_opcode),
+        0xec => cpe(cpu, next_opcode, next_next_opcode),
+        0xe4 => cpo(cpu, next_opcode, next_next_opcode),
 
         //Rs
         0xc9 => ret(cpu),
@@ -373,13 +376,13 @@ pub fn emulate_8080_op(cpu: CPUState, opcode: &[u8]) -> CPUState {
         0xbf => cmp(cpu.a, 1, cpu),
 
         //ANI
-        0xe6 => ani(opcode[1], cpu),
+        0xe6 => ani(next_opcode, cpu),
         //XRI
-        0xee => xri(opcode[1], cpu),
+        0xee => xri(next_opcode, cpu),
         //ORI
-        0xf6 => ori(opcode[1], cpu),
+        0xf6 => ori(next_opcode, cpu),
         //CPI
-        0xfe => cpi(opcode[1], cpu),
+        0xfe => cpi(next_opcode, cpu),
         //RLC
         0x07 => rlc(cpu),
         //RRC

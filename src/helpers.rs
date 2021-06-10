@@ -1,5 +1,6 @@
 use std::fs::File;
 use crate::invaders::Machine;
+use crate::cpu::CPUState;
 use std::io::Read;
 
 pub fn new_machine() -> (Machine, Vec<u8>) {
@@ -7,7 +8,7 @@ pub fn new_machine() -> (Machine, Vec<u8>) {
     let mut f = File::open("invaders").unwrap();
     f.read_to_end(&mut buffer).unwrap();
     let mut machine = Machine::new();
-    machine.load_memory(&buffer, buffer.len());
+    machine.load_rom(0x00);
     (machine , buffer)
 }
 
@@ -44,4 +45,17 @@ pub fn get_value_memory(memory: &Vec<u8>, hr: u8, lr: u8) -> u8 {
 pub fn write_memory(mut memory: Vec<u8>, address: u16, value: u8) -> Vec<u8> {
     memory[address as usize] = value;
     memory
+}
+
+pub fn generate_interrupt(cpu: CPUState, interrupt_num: u32) -> CPUState {
+    let mut memory = cpu.memory;
+    memory[(cpu.sp - 1) as usize] = (cpu.pc >> 8) as u8;
+    memory[(cpu.sp - 2) as usize] = cpu.pc as u8;
+    CPUState {
+        memory,
+        sp: cpu.sp - 2,
+        pc: 8*(interrupt_num as u16),
+        int_enable: false,
+        ..cpu
+    }
 }

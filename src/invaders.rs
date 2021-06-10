@@ -1,6 +1,7 @@
 use crate::cpu::CPUState;
 use crate::cpu::emulate_8080_op;
 use crate::interrupts::handle_interrupts;
+use std;
 
 const SCALE: u32 = 8;
 
@@ -29,15 +30,25 @@ impl Machine {
         }
     }
 
-    pub fn load_memory(&mut self, rom: &Vec<u8>, size: usize) {
-        self.cpu.load_memory(rom, size);
+    pub fn load_rom(&mut self, start: usize) {
+        let x = std::include_bytes!("invaders");
+        let mut i = 0;
+        if x.len() > start+0xffff {
+            panic!("PANIC: Rom size exceeds Memory!!");
+        } else {
+            while i< x.len() {
+                self.cpu.memory[start+i] = x[i];
+                i += 1;
+            }
+        }
     }
 
 }
 
-pub fn emulate_invaders(mut machine: Machine, opcode: &[u8]) -> Machine {
-    match opcode[0] {
-        0xdb | 0xd3 => handle_interrupts(machine, opcode),
-        _ => Machine { cpu: emulate_8080_op(machine.cpu, opcode), ..machine}
+pub fn emulate_invaders(mut machine: Machine) -> Machine {
+    let opcode: u8 = machine.cpu.memory[machine.cpu.pc as usize];
+    match opcode {
+        0xdb | 0xd3 => handle_interrupts(machine),
+        _ => Machine { cpu: emulate_8080_op(machine.cpu), ..machine}
     }
 }

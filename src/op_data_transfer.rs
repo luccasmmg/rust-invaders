@@ -14,7 +14,7 @@ pub fn mov_r_r(r: Registers, value: u8, cpu: CPUState) -> CPUState {
     };
     CPUState {
         cycles: 1,
-        pc: inter_cpu.pc + 1,
+        pc: inter_cpu.pc.wrapping_add(1),
         ..inter_cpu
     }
 }
@@ -33,7 +33,7 @@ pub fn mov_r_m(cpu: CPUState, r: Registers) -> CPUState {
     };
     CPUState {
         cycles: 2,
-        pc: inter_cpu.pc + 1,
+        pc: inter_cpu.pc.wrapping_add(1),
         ..inter_cpu
     }
 }
@@ -52,7 +52,7 @@ pub fn mov_m_r(cpu: CPUState, r: Registers) -> CPUState {
     CPUState {
         memory,
         cycles: 2,
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         ..cpu
     }
 }
@@ -70,7 +70,7 @@ pub fn mvi_r(cpu: CPUState, r: char, value: u8) -> CPUState {
     };
     CPUState {
         cycles: 2,
-        pc: inter_cpu.pc + 2,
+        pc: inter_cpu.pc.wrapping_add(2),
         ..inter_cpu
     }
 }
@@ -80,7 +80,7 @@ pub fn mvi_m(cpu: CPUState, value: u8) -> CPUState {
     CPUState {
         memory: write_memory(cpu.memory, address, value),
         cycles: 3,
-        pc: cpu.pc + 2,
+        pc: cpu.pc.wrapping_add(2),
         ..cpu
     }
 }
@@ -91,27 +91,27 @@ pub fn lxi(cpu: CPUState, rs: (char, char), opcode_1: u8, opcode_2: u8) -> CPUSt
             b: opcode_2,
             c: opcode_1,
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
         ('d', 'e') => CPUState {
             d: opcode_2,
             e: opcode_1,
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
         ('h', 'l') => CPUState {
             h: opcode_2,
             l: opcode_1,
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
         ('s', 'p') => CPUState {
             sp: ((opcode_2 as u16) << 8 | opcode_1 as u16),
             cycles: 3,
-            pc: cpu.pc + 3,
+            pc: cpu.pc.wrapping_add(3),
             ..cpu
         },
         _ => cpu,
@@ -123,7 +123,7 @@ pub fn lda(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     CPUState {
         a: cpu.memory[address as usize],
         cycles: 4,
-        pc: cpu.pc + 3,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -135,7 +135,7 @@ pub fn sta(cpu: CPUState) -> CPUState {
     CPUState {
         memory,
         cycles: 4,
-        pc: cpu.pc + 3,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -148,7 +148,7 @@ pub fn lhld(cpu: CPUState) -> CPUState {
         h: cpu.memory[address_h as usize],
         l: cpu.memory[address_l as usize],
         cycles: 5,
-        pc: cpu.pc + 3,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -162,7 +162,7 @@ pub fn shld(cpu: CPUState) -> CPUState {
     CPUState {
         memory: memory_h,
         cycles: 5,
-        pc: cpu.pc + 3,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -182,7 +182,7 @@ pub fn ldax(cpu: CPUState, rs: (char, char)) -> CPUState {
     CPUState {
         a: value,
         cycles: 2,
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         ..cpu
     }
 }
@@ -202,7 +202,7 @@ pub fn stax(cpu: CPUState, rs: (char, char)) -> CPUState {
     CPUState {
         memory,
         cycles: 2,
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         ..cpu
     }
 }
@@ -214,7 +214,7 @@ pub fn xchg(cpu: CPUState) -> CPUState {
         d: cpu.h,
         e: cpu.l,
         cycles: 1,
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         ..cpu
     }
 }

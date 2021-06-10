@@ -4,7 +4,7 @@ use crate::cpu::CPUState;
 
 pub fn ei(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         int_enable: true,
         cycles: 1,
         ..cpu
@@ -13,7 +13,7 @@ pub fn ei(cpu: CPUState) -> CPUState {
 
 pub fn di(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         int_enable: false,
         cycles: 1,
         ..cpu
@@ -27,7 +27,7 @@ pub fn hlt() {
 pub fn op_in(cpu: CPUState, value: u8) -> CPUState {
     CPUState {
         a: value,
-        pc: cpu.pc + 2,
+        pc: cpu.pc.wrapping_add(2),
         cycles: 3,
         ..cpu
     }
@@ -35,7 +35,7 @@ pub fn op_in(cpu: CPUState, value: u8) -> CPUState {
 
 pub fn out(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 2,
+        pc: cpu.pc.wrapping_add(2),
         cycles: 3,
         ..cpu
     }
@@ -43,7 +43,7 @@ pub fn out(cpu: CPUState) -> CPUState {
 
 pub fn nop(cpu: CPUState) -> CPUState {
     CPUState {
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         cycles: 1,
         ..cpu
     }
