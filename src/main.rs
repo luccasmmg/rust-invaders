@@ -90,7 +90,6 @@ fn redraw_screen(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, machine
 
     for offset in 0..0xE00 {
         let byte = machine.cpu.memory[start_memory + offset];
-        println!("{}", byte);
 
         for bit in 0..8 {
             let color: u32 = if byte & (1 << bit) == 0 {
@@ -155,6 +154,22 @@ mod test {
             n += 1;
         }
         assert_eq!(cpu.pc , 0x090e)
+    }
+
+    #[test]
+    fn test_39_000_instructions_cpu_pc() {
+        let mut cpu = CPUState::new();
+        let mut buffer = Vec::new();
+        let mut f = File::open("invaders").unwrap();
+        f.read_to_end(&mut buffer).unwrap();
+        cpu.load_memory(&buffer, buffer.len());
+        let mut n = 0;
+        while n < 39000 {
+            cpu = emulate_8080_op(cpu);
+            disassemble(&buffer[cpu.pc as usize..], cpu.pc as usize);
+            n += 1;
+        }
+        assert_eq!(cpu.pc , 0x1442)
     }
 
     #[test]

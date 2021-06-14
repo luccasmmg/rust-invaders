@@ -31,7 +31,7 @@ impl Machine {
     }
 
     pub fn load_rom(&mut self, start: usize) {
-        let x = std::include_bytes!("invaders");
+        let x = std::include_bytes!("invaders.rom");
         let mut i = 0;
         if x.len() > start+0xffff {
             panic!("PANIC: Rom size exceeds Memory!!");
