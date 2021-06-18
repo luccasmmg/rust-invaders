@@ -5,6 +5,7 @@ use std;
 
 const SCALE: u32 = 8;
 
+#[derive(Debug, PartialEq)]
 pub struct Machine {
     pub cpu: CPUState,
 

@@ -48,12 +48,14 @@ pub fn write_memory(mut memory: Vec<u8>, address: u16, value: u8) -> Vec<u8> {
 }
 
 pub fn generate_interrupt(cpu: CPUState, interrupt_num: u32) -> CPUState {
+    println!("Pushing to static(interrupt): {:04x}", cpu.pc);
     let mut memory = cpu.memory;
     memory[(cpu.sp - 1) as usize] = (cpu.pc >> 8) as u8;
     memory[(cpu.sp - 2) as usize] = cpu.pc as u8;
+    println!("PC is at: {:04x}", 8*(interrupt_num as u16));
     CPUState {
         memory,
-        sp: cpu.sp - 2,
+        sp: cpu.sp.wrapping_sub(2),
         pc: 8*(interrupt_num as u16),
         int_enable: false,
         ..cpu

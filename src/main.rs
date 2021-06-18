@@ -50,6 +50,14 @@ fn main() -> io::Result<()> {
     canvas.present();
 
     'running: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    break 'running
+                },
+                _ => {}
+            }
+        }
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
         machine = half_step(machine, &mut canvas, true);
@@ -61,25 +69,25 @@ fn main() -> io::Result<()> {
 }
 
 fn half_step(mut machine: Machine, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, top_half: bool) -> Machine {
+    println!("{}", top_half);
     let mut cycles_spent:u128 = 0;
-        while cycles_spent < (CYCLES_PER_FRAME / 2) as u128 {
-            machine = emulate_invaders(machine);
-
-            cycles_spent += machine.cpu.cycles as u128;
+    while cycles_spent < (CYCLES_PER_FRAME / 2) as u128 {
+        machine = emulate_invaders(machine);
+        cycles_spent += machine.cpu.cycles as u128;
+    }
+    // println!("REDRAWING!");
+    redraw_screen(canvas, &machine, top_half);
+    let int_enable = machine.cpu.int_enable;
+    if int_enable {
+        return Machine {
+            cpu: generate_interrupt(machine.cpu, if top_half { 1 } else { 2 }),
+            ..machine
         }
-        // println!("REDRAWING!");
-        let machine = redraw_screen(canvas, machine, top_half);
-        let int_enable = machine.cpu.int_enable;
-        if int_enable {
-            return Machine {
-                cpu: generate_interrupt(machine.cpu, if top_half { 1 } else { 2 }),
-                ..machine
-            }
-        }
-        machine
+    }
+    machine
 }
 
-fn redraw_screen(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, machine: Machine, top_half: bool) -> Machine {
+fn redraw_screen(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, machine: &Machine, top_half: bool) {
     let width:usize = 224;
     let height:usize = 256;
     let (start_memory, start_pixel) = if top_half {
@@ -106,7 +114,6 @@ fn redraw_screen(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, machine
             }
         }
     }
-    machine
 }
 
 fn draw_pixel(canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, x: i32, y: i32) {

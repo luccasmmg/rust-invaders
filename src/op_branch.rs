@@ -133,7 +133,7 @@ pub fn call(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     CPUState {
         cycles: 5,
         pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-        sp: cpu.sp - 2,
+        sp: cpu.sp.wrapping_sub(2),
         memory,
         ..cpu
     }

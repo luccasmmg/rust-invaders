@@ -10,6 +10,27 @@ use crate::op_stack::*;
 use crate::op_special_io::*;
 
 pub const MEMORY_SIZE: usize = 0x10000;
+pub const CYCLES8080: [u8;256] = [
+                4, 10, 7, 5, 5, 5, 7, 4, 4, 10, 7, 5, 5, 5, 7, 4, //0x00..0x0f
+                4, 10, 7, 5, 5, 5, 7, 4, 4, 10, 7, 5, 5, 5, 7, 4, //0x10..0x1f
+                4, 10, 16, 5, 5, 5, 7, 4, 4, 10, 16, 5, 5, 5, 7, 4, //etc
+                4, 10, 13, 5, 10, 10, 10, 4, 4, 10, 13, 5, 5, 5, 7, 4,
+
+                5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, //0x40..0x4f
+                5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5,
+                5, 5, 5, 5, 5, 5, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5,
+                7, 7, 7, 7, 7, 7, 7, 7, 5, 5, 5, 5, 5, 5, 7, 5,
+
+                4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4, //0x80..8x4f
+                4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4,
+                4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4,
+                4, 4, 4, 4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 7, 4,
+
+                11, 10, 10, 10, 17, 11, 7, 11, 11, 10, 10, 10, 10, 17, 7, 11, //0xc0..0xcf
+                11, 10, 10, 10, 17, 11, 7, 11, 11, 10, 10, 10, 10, 17, 7, 11,
+                11, 10, 10, 18, 17, 11, 7, 11, 11, 5, 10, 5, 17, 17, 7, 11,
+                11, 10, 10, 4, 17, 11, 7, 11, 11, 5, 10, 4, 17, 17, 7, 11
+            ];
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum StackPairs {
@@ -90,7 +111,7 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
     let opcode: u8 = cpu.memory[cpu.pc as usize];
     let next_opcode: u8 = cpu.memory[cpu.pc.wrapping_add(1) as usize];
     let next_next_opcode: u8 = cpu.memory[cpu.pc.wrapping_add(2) as usize];
-    match opcode {
+    let new_cpu_state = match opcode {
         0x00 => nop(cpu),
         // LXI OPS
         0x01 => lxi(cpu, ('b', 'c'), next_opcode, next_next_opcode),
@@ -404,5 +425,7 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x76 => panic!(),
         _ => cpu,
 
-    }
+    };
+    let cycles: u8 = CYCLES8080[(opcode)as usize];
+    CPUState { cycles: cycles, ..new_cpu_state }
 }

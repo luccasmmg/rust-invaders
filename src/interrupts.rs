@@ -30,7 +30,7 @@ fn out_space_invaders(machine: Machine, port: u8) -> Machine {
     let value = machine.cpu.a;
     match port {
         2 => {
-            Machine { cpu: CPUState { pc: machine.cpu.pc + 2, ..machine.cpu },
+            Machine { cpu: CPUState { pc: machine.cpu.pc.wrapping_add(2), ..machine.cpu },
                       shift_offset: value & 0x7,
                       ..machine}
         },
@@ -38,13 +38,13 @@ fn out_space_invaders(machine: Machine, port: u8) -> Machine {
             Machine {
                 shift0: machine.shift1,
                 shift1: value,
-                cpu: CPUState { pc: machine.cpu.pc + 2, ..machine.cpu },
+                cpu: CPUState { pc: machine.cpu.pc.wrapping_add(2), ..machine.cpu },
                 ..machine
             }
         },
-        6 => Machine { cpu: CPUState { pc: machine.cpu.pc + 2, ..machine.cpu }, ..machine},
+        6 => Machine { cpu: CPUState { pc: machine.cpu.pc.wrapping_add(2), ..machine.cpu }, ..machine},
         _ => {
-            Machine { cpu: CPUState { pc: machine.cpu.pc + 2, ..machine.cpu }, ..machine}
+            Machine { cpu: CPUState { pc: machine.cpu.pc.wrapping_add(2), ..machine.cpu }, ..machine}
         }
     }
 }
