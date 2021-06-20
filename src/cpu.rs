@@ -243,6 +243,7 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0x7b => mov_r_r(Registers::A, cpu.e, cpu),
         0x7c => mov_r_r(Registers::A, cpu.h, cpu),
         0x7d => mov_r_r(Registers::A, cpu.l, cpu),
+        0x7f => mov_r_r(Registers::A, cpu.a, cpu),
         0x7e => mov_r_m(cpu, Registers::A),
 
         //PUSH
@@ -423,7 +424,7 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0xfb => ei(cpu),
         0xf3 => di(cpu),
         0x76 => panic!(),
-        _ => { println!("wtf - {}", opcode); cpu},
+        _ => { println!("wtf - {:04x}", opcode); cpu},
 
     };
     let cycles: u8 = CYCLES8080[(opcode) as usize];
