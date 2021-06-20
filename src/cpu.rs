@@ -423,9 +423,9 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
         0xfb => ei(cpu),
         0xf3 => di(cpu),
         0x76 => panic!(),
-        _ => cpu,
+        _ => { println!("wtf - {}", opcode); cpu},
 
     };
-    let cycles: u8 = CYCLES8080[(opcode)as usize];
+    let cycles: u8 = CYCLES8080[(opcode) as usize];
     CPUState { cycles: cycles, ..new_cpu_state }
 }

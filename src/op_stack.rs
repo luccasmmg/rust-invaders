@@ -54,13 +54,24 @@ pub fn pop(cpu: CPUState, rp: StackPairs) -> CPUState {
 
 pub fn push_psw(cpu: CPUState) -> CPUState {
     let mut memory = cpu.memory;
-    memory[(cpu.sp.wrapping_sub(1)) as usize] = cpu.a;
-    let psw: u8 = cpu.cc.z
-        | cpu.cc.s << 1
-        | cpu.cc.p << 2
-        | cpu.cc.cy << 3
-        | cpu.cc.ac << 4;
-    memory[(cpu.sp.wrapping_sub(2)) as usize] = psw;
+    let mut psw:u16 = 0;
+    let s = if cpu.cc.s == 1 { 1 } else { 0 };
+    let z = if cpu.cc.z == 1 { 1 } else { 0 };
+    let ac = if cpu.cc.ac == 1 { 1 } else { 0 };
+    let p = if cpu.cc.p == 1 { 1 } else { 0 };
+    let cy = if cpu.cc.cy == 1 { 1 } else { 0 };
+
+    psw |= s << 7;
+    psw |= z << 6;
+    psw |= 0 << 5;
+    psw |= ac << 4;
+    psw |= 0 << 3;
+    psw |= p << 2;
+    psw |= 1 << 1;
+    psw |= cy;
+    psw |= (cpu.a as u16) << 8;
+    memory[cpu.sp as usize - 1] = (psw >> 8) as u8;
+    memory[cpu.sp as usize - 2] = psw as u8;
     CPUState {
         memory,
         cycles: 3,

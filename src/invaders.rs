@@ -3,8 +3,6 @@ use crate::cpu::emulate_8080_op;
 use crate::interrupts::handle_interrupts;
 use std;
 
-const SCALE: u32 = 8;
-
 #[derive(Debug, PartialEq)]
 pub struct Machine {
     pub cpu: CPUState,
@@ -46,7 +44,7 @@ impl Machine {
 
 }
 
-pub fn emulate_invaders(mut machine: Machine) -> Machine {
+pub fn emulate_invaders(machine: Machine) -> Machine {
     let opcode: u8 = machine.cpu.memory[machine.cpu.pc as usize];
     match opcode {
         0xdb | 0xd3 => handle_interrupts(machine),
