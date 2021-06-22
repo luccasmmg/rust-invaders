@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use crate::cpu::CPUState;
+use crate::helpers::pop_from_stack;
 
 pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     CPUState {
@@ -324,23 +325,20 @@ pub fn cpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn ret(cpu: CPUState) -> CPUState {
+    let (cpu, addr) = pop_from_stack(cpu);
     CPUState {
-        cycles: 5,
-        pc: cpu.memory[cpu.sp as usize] as u16 |( cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-        sp: cpu.sp + 2,
+        cycles: 10,
+        pc: addr,
+        sp: cpu.sp.wrapping_add(2),
         ..cpu
     }
 }
 
 pub fn rc(cpu: CPUState) -> CPUState {
     match cpu.cc.cy {
-        1 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        1 => ret(cpu),
         _ => CPUState {
-            cycles: 3,
+            cycles: 5,
             pc: cpu.pc.wrapping_add(1),
             ..cpu
         },
@@ -349,11 +347,7 @@ pub fn rc(cpu: CPUState) -> CPUState {
 
 pub fn rnc(cpu: CPUState) -> CPUState {
     match cpu.cc.cy {
-        0 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        0 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -364,11 +358,7 @@ pub fn rnc(cpu: CPUState) -> CPUState {
 
 pub fn rz(cpu: CPUState) -> CPUState {
     match cpu.cc.z {
-        1 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        1 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -379,11 +369,7 @@ pub fn rz(cpu: CPUState) -> CPUState {
 
 pub fn rnz(cpu: CPUState) -> CPUState {
     match cpu.cc.z {
-        0 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        0 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -394,11 +380,7 @@ pub fn rnz(cpu: CPUState) -> CPUState {
 
 pub fn rp(cpu: CPUState) -> CPUState {
     match cpu.cc.s {
-        0 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        0 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -409,11 +391,7 @@ pub fn rp(cpu: CPUState) -> CPUState {
 
 pub fn rm(cpu: CPUState) -> CPUState {
     match cpu.cc.s {
-        1 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        1 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -424,11 +402,7 @@ pub fn rm(cpu: CPUState) -> CPUState {
 
 pub fn rpo(cpu: CPUState) -> CPUState {
     match cpu.cc.p {
-        0 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        0 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),
@@ -439,11 +413,7 @@ pub fn rpo(cpu: CPUState) -> CPUState {
 
 pub fn rpe(cpu: CPUState) -> CPUState {
     match cpu.cc.p {
-        1 => CPUState {
-            cycles: 5,
-            pc: cpu.memory[cpu.sp as usize] as u16 | (cpu.memory[cpu.sp as usize + 1] as u16) << 8,
-            ..cpu
-        },
+        1 => ret(cpu),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(1),

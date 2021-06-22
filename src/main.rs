@@ -71,10 +71,10 @@ fn main() -> io::Result<()> {
 fn half_step(mut machine: Machine, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, top_half: bool) -> Machine {
     let mut cycles_spent:u128 = 0;
     while cycles_spent < (CYCLES_PER_FRAME / 2) as u128 {
+        println!("{:04x}", machine.cpu.pc);
         machine = emulate_invaders(machine);
         cycles_spent += machine.cpu.cycles as u128;
     }
-    //println!("{}", cycles_spent);
     // println!("REDRAWING!");
     redraw_screen(canvas, &machine, top_half);
     let int_enable = machine.cpu.int_enable;

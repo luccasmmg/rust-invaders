@@ -48,7 +48,7 @@ pub fn write_memory(mut memory: Vec<u8>, address: u16, value: u8) -> Vec<u8> {
 }
 
 pub fn generate_interrupt(cpu: CPUState, interrupt_num: u32) -> CPUState {
-    //println!("Pushing to static(interrupt): {:04x}", cpu.pc);
+    println!("Pushing to static(interrupt): {:04x}", cpu.pc);
     let mut memory = cpu.memory;
     memory[(cpu.sp - 1) as usize] = (cpu.pc >> 8) as u8;
     memory[(cpu.sp - 2) as usize] = cpu.pc as u8;
@@ -59,4 +59,10 @@ pub fn generate_interrupt(cpu: CPUState, interrupt_num: u32) -> CPUState {
         int_enable: false,
         ..cpu
     }
+}
+
+pub fn pop_from_stack(cpu: CPUState) -> (CPUState, u16) {
+    let addr: u16;
+    addr = ((cpu.memory[cpu.sp as usize + 1] as u16) << 8) | (cpu.memory[cpu.sp as usize] as u16);
+    (cpu, addr)
 }

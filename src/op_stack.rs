@@ -3,29 +3,37 @@ use crate::condition_codes::ConditionCodes;
 use crate::cpu::StackPairs;
 use crate::helpers::write_memory;
 
-pub fn push(cpu: CPUState, rp: StackPairs) -> CPUState {
+fn push_to_stack_addr(cpu: CPUState, addr : u16) -> CPUState {
     let mut memory = cpu.memory;
-    match rp {
-        StackPairs::BC => {
-            memory[(cpu.sp.wrapping_sub(1)) as usize] = cpu.b;
-            memory[(cpu.sp.wrapping_sub(2)) as usize] = cpu.c;
-        }
-        StackPairs::DE => {
-            memory[(cpu.sp.wrapping_sub(1)) as usize] = cpu.d;
-            memory[(cpu.sp.wrapping_sub(2)) as usize] = cpu.e;
-        }
-        StackPairs::HL => {
-            memory[(cpu.sp.wrapping_sub(1)) as usize] = cpu.h;
-            memory[(cpu.sp.wrapping_sub(2)) as usize] = cpu.l;
-        }
-    }
-
+    memory[cpu.sp as usize - 1] = (addr >> 8) as u8;
+    memory[cpu.sp as usize - 2] = addr as u8;
     CPUState {
         memory,
-        cycles: 3,
         sp: cpu.sp.wrapping_sub(2),
-        pc: cpu.pc.wrapping_add(1),
         ..cpu
+    }
+}
+
+pub fn push(cpu: CPUState, rp: StackPairs) -> CPUState {
+    let new_cpu = match rp {
+        StackPairs::BC => {
+            let addr = ((cpu.b as u16) << 8) | cpu.c as u16;
+            push_to_stack_addr(cpu, addr)
+        }
+        StackPairs::DE => {
+            let addr = ((cpu.d as u16) << 8) | cpu.e as u16;
+            push_to_stack_addr(cpu, addr)
+        }
+        StackPairs::HL => {
+            let addr = ((cpu.h as u16) << 8) | cpu.l as u16;
+            push_to_stack_addr(cpu, addr)
+        }
+    };
+
+    CPUState {
+        cycles: 3,
+        pc: new_cpu.pc.wrapping_add(1),
+        ..new_cpu
     }
 }
 
