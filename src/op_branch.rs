@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use crate::cpu::CPUState;
-use crate::helpers::pop_from_stack;
+use crate::helpers::{pop_from_stack, push_to_stack_addr};
 
 pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     CPUState {
@@ -115,46 +115,14 @@ pub fn jm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn call(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    if 5 == (( (opcode_2 as u16) << 8 | opcode_1 as u16)) {
-        if cpu.c == 9 {
-            let offset: u16 = (cpu.d as u16) << 8 | cpu.e as u16;
-            let message: Vec<_> = cpu.memory[(offset + 3) as usize..].iter().map(|x| *x as char).take_while(|x| x != &'$').collect();
-            println!("{:?}", message);
-        } else if cpu.c == 2 {
-            println!("char routine called\n");
-        }
-    } else if 0 == (opcode_2 as u16) << 8 | opcode_1 as u16 {
-       println!("Finished");
-       panic!()
-    };
-    let pc = (cpu.pc.wrapping_add(3)).to_be_bytes();
-    let mut memory = cpu.memory;
-    memory[cpu.sp as usize - 1] = pc[0];
-    memory[cpu.sp as usize - 2] = pc[1];
-    CPUState {
-        cycles: 5,
-        pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-        sp: cpu.sp.wrapping_sub(2),
-        memory,
-        ..cpu
-    }
+    let pc = cpu.pc.wrapping_add(3);
+    let cpu = push_to_stack_addr(cpu, pc);
+    jmp(cpu, opcode_1, opcode_2)
 }
 
 pub fn cc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.cy {
-        1 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        1 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -165,19 +133,7 @@ pub fn cc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.cy {
-        0 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        0 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -188,19 +144,7 @@ pub fn cnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.z {
-        1 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        1 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -211,19 +155,7 @@ pub fn cz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.z {
-        0 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        0 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -234,19 +166,7 @@ pub fn cnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.s {
-        0 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        0 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -257,19 +177,7 @@ pub fn cp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.s {
-        1 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        1 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -280,19 +188,7 @@ pub fn cm(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.p {
-        1 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        1 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
@@ -303,19 +199,7 @@ pub fn cpe(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 
 pub fn cpo(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
     match cpu.cc.p {
-        0 => {
-            let ret: u16 = cpu.pc as u16 + 3;
-            let mut memory = cpu.memory;
-            memory[cpu.sp as usize - 1] = ((ret >> 8) & 0xff) as u8;
-            memory[cpu.sp as usize - 2] = ((ret & 0xff)) as u8;
-            CPUState {
-                cycles: 5,
-                pc: (opcode_2 as u16) << 8 | opcode_1 as u16,
-                sp: cpu.sp - 2,
-                memory: memory,
-                ..cpu
-            }
-        }
+        0 => call(cpu, opcode_1, opcode_2),
         _ => CPUState {
             cycles: 3,
             pc: cpu.pc.wrapping_add(3),
