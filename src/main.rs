@@ -52,9 +52,37 @@ fn main() -> io::Result<()> {
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
+                Event::Quit {..} |
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
+                Event::KeyDown {keycode: Some(Keycode::A), .. } => machine.in_port1 |= 0x20,
+                Event::KeyDown {keycode: Some(Keycode::D), .. } => machine.in_port1 |= 0x40,
+                Event::KeyDown {keycode: Some(Keycode::W), .. } => machine.in_port1 |= 0x10,
+
+                Event::KeyDown {keycode: Some(Keycode::J), .. } => machine.in_port2 |= 0x20,
+                Event::KeyDown {keycode: Some(Keycode::L), .. } => machine.in_port2 |= 0x40,
+                Event::KeyDown {keycode: Some(Keycode::I), .. } => machine.in_port2 |= 0x10,
+
+                Event::KeyDown {keycode: Some(Keycode::Num1), .. } => machine.in_port1 |= 0x04,
+                Event::KeyDown {keycode: Some(Keycode::Num2), .. } => machine.in_port1 |= 0x02,
+
+                Event::KeyDown {keycode: Some(Keycode::C), .. } => machine.in_port1 |= 0x1,
+
+
+
+                Event::KeyUp {keycode: Some(Keycode::A), .. } => machine.in_port1 &= !0x20,
+                Event::KeyUp {keycode: Some(Keycode::D), .. } => machine.in_port1 &= !0x40,
+                Event::KeyUp {keycode: Some(Keycode::W), .. } => machine.in_port1 &= !0x10,
+
+                Event::KeyUp {keycode: Some(Keycode::J), .. } => machine.in_port2 &= !0x20,
+                Event::KeyUp {keycode: Some(Keycode::L), .. } => machine.in_port2 &= !0x40,
+                Event::KeyUp {keycode: Some(Keycode::I), .. } => machine.in_port2 &= !0x10,
+
+                Event::KeyUp {keycode: Some(Keycode::Num1), .. } => machine.in_port1 &= !0x04,
+                Event::KeyUp {keycode: Some(Keycode::Num2), .. } => machine.in_port1 &= !0x02,
+
+                Event::KeyUp {keycode: Some(Keycode::C), .. } => machine.in_port1 &= !0x1,
                 _ => {}
             }
         }
@@ -72,10 +100,11 @@ fn half_step(mut machine: Machine, canvas: &mut sdl2::render::Canvas<sdl2::video
     let mut cycles_spent:u128 = 0;
     while cycles_spent < (CYCLES_PER_FRAME / 2) as u128 {
         println!("{:04x}", machine.cpu.pc);
+        println!("{}", machine.cpu.cc);
         machine = emulate_invaders(machine);
         cycles_spent += machine.cpu.cycles as u128;
     }
-    // println!("REDRAWING!");
+    //println!("{}", cycles_spent);
     redraw_screen(canvas, &machine, top_half);
     let int_enable = machine.cpu.int_enable;
     if int_enable {

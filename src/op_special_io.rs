@@ -28,7 +28,7 @@ pub fn op_in(cpu: CPUState, value: u8) -> CPUState {
     CPUState {
         a: value,
         pc: cpu.pc.wrapping_add(2),
-        cycles: 3,
+        cycles: 10,
         ..cpu
     }
 }

@@ -1,7 +1,6 @@
 use crate::cpu::CPUState;
-use crate::condition_codes::ConditionCodes;
 use crate::cpu::StackPairs;
-use crate::helpers::write_memory;
+use crate::helpers::{pop_from_stack, set_psw, write_memory};
 
 fn push_to_stack_addr(cpu: CPUState, addr : u16) -> CPUState {
     let mut memory = cpu.memory;
@@ -90,16 +89,12 @@ pub fn push_psw(cpu: CPUState) -> CPUState {
 }
 
 pub fn pop_psw(cpu: CPUState) -> CPUState {
-    let psw = cpu.memory[cpu.sp as usize];
-    let z = if psw & 0x01 == 0x01 { 1 } else { 0 };
-    let s = if psw & 0x02 == 0x02 { 1 } else { 0 };
-    let p = if psw & 0x04 == 0x04 { 1 } else { 0 };
-    let cy = if psw & 0x05 == 0x08 { 1 } else { 0 };
-    let ac = if psw & 0x10 == 0x10 { 1 } else { 0 };
+    let (cpu, data) = pop_from_stack(cpu);
+    let a = (data >> 8) as u8;
     CPUState {
         cycles: 3,
-        a: cpu.memory[(cpu.sp.wrapping_add(1)) as usize],
-        cc: ConditionCodes { z, s, p, cy, ac, ..cpu.cc },
+        a,
+        cc: set_psw(data as u8),
         sp: cpu.sp.wrapping_add(2),
         pc: cpu.pc.wrapping_add(1),
         ..cpu
