@@ -1,17 +1,6 @@
 use crate::cpu::CPUState;
 use crate::cpu::StackPairs;
-use crate::helpers::{pop_from_stack, set_psw, write_memory};
-
-fn push_to_stack_addr(cpu: CPUState, addr : u16) -> CPUState {
-    let mut memory = cpu.memory;
-    memory[cpu.sp as usize - 1] = (addr >> 8) as u8;
-    memory[cpu.sp as usize - 2] = addr as u8;
-    CPUState {
-        memory,
-        sp: cpu.sp.wrapping_sub(2),
-        ..cpu
-    }
-}
+use crate::helpers::{pop_from_stack, set_psw, push_to_stack_addr};
 
 pub fn push(cpu: CPUState, rp: StackPairs) -> CPUState {
     let new_cpu = match rp {
@@ -60,11 +49,10 @@ pub fn pop(cpu: CPUState, rp: StackPairs) -> CPUState {
 }
 
 pub fn push_psw(cpu: CPUState) -> CPUState {
-    let mut memory = cpu.memory;
     let mut psw:u16 = 0;
     let s = if cpu.cc.s == 1 { 1 } else { 0 };
     let z = if cpu.cc.z == 1 { 1 } else { 0 };
-    let ac = if cpu.cc.ac == 1 { 1 } else { 0 };
+    let ac = 0;
     let p = if cpu.cc.p == 1 { 1 } else { 0 };
     let cy = if cpu.cc.cy == 1 { 1 } else { 0 };
 
@@ -77,14 +65,10 @@ pub fn push_psw(cpu: CPUState) -> CPUState {
     psw |= 1 << 1;
     psw |= cy;
     psw |= (cpu.a as u16) << 8;
-    memory[cpu.sp as usize - 1] = (psw >> 8) as u8;
-    memory[cpu.sp as usize - 2] = psw as u8;
+    //println!("S: {}, Z: {}, AC: {}, P: {}, CY: {}, PSW: {}, A_Register: {}", s, z, ac, p, cy, psw, cpu.a);
     CPUState {
-        memory,
-        cycles: 3,
-        sp: cpu.sp.wrapping_sub(2),
         pc: cpu.pc.wrapping_add(1),
-        ..cpu
+        ..push_to_stack_addr(cpu, psw)
     }
 }
 
@@ -95,24 +79,19 @@ pub fn pop_psw(cpu: CPUState) -> CPUState {
         cycles: 3,
         a,
         cc: set_psw(data as u8),
-        sp: cpu.sp.wrapping_add(2),
         pc: cpu.pc.wrapping_add(1),
         ..cpu
     }
 }
 
 pub fn xthl(cpu: CPUState) -> CPUState {
-    let l = cpu.memory[cpu.sp as usize];
-    let h = cpu.memory[(cpu.sp.wrapping_add(1)) as usize];
-    let mut memory = write_memory(cpu.memory, cpu.sp, cpu.l);
-    memory = write_memory(memory, cpu.sp.wrapping_add(1), cpu.h);
+    let temp:u16 = ((cpu.h as u16) << 8) | (cpu.l as u16);
+    let (cpu, temp2) = pop_from_stack(cpu);
     CPUState {
-        l,
-        h,
-        cycles: 3,
         pc: cpu.pc.wrapping_add(1),
-        memory,
-        ..cpu
+        h: (temp2 >> 8) as u8,
+        l: temp2 as u8,
+        ..push_to_stack_addr(cpu, temp)
     }
 }
 

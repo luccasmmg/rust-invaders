@@ -11,27 +11,23 @@ pub fn jmp(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn jnz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let value = if cpu.cc.z == 0 {
-        (opcode_2 as u16) << 8 | opcode_1 as u16
-    } else {
-        cpu.pc.wrapping_add(3)
-    };
+    if cpu.cc.z == 0 {
+        return jmp(cpu, opcode_1, opcode_2);
+    }
     CPUState {
         cycles: 3,
-        pc: value,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
 
 pub fn jz(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let value = if cpu.cc.z == 1 {
-        (opcode_2 as u16) << 8 | opcode_1 as u16
-    } else {
-        cpu.pc.wrapping_add(3)
-    };
+    if cpu.cc.z == 1 {
+        return jmp(cpu, opcode_1, opcode_2);
+    }
     CPUState {
         cycles: 3,
-        pc: value,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -50,14 +46,12 @@ pub fn jnc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
 }
 
 pub fn jc(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let value = if cpu.cc.cy == 1 {
-        (opcode_2 as u16) << 8 | opcode_1 as u16
-    } else {
-        cpu.pc.wrapping_add(3)
-    };
+    if cpu.cc.cy == 1 {
+        return jmp(cpu, opcode_1, opcode_2);
+    }
     CPUState {
         cycles: 3,
-        pc: value,
+        pc: cpu.pc.wrapping_add(3),
         ..cpu
     }
 }
@@ -213,7 +207,6 @@ pub fn ret(cpu: CPUState) -> CPUState {
     CPUState {
         cycles: 10,
         pc: addr,
-        sp: cpu.sp.wrapping_add(2),
         ..cpu
     }
 }

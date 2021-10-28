@@ -1,0 +1,75 @@
+Pressed key
+Pushing to stack addr: 0402 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0020 at SP: 000023f4
+Triggered
+Triggered
+Pushing to stack addr: 005a at SP: 000023f4
+Pushing to stack addr: 0a9e at SP: 000023fe
+Pushing to stack addr: 0306 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0aa1 at SP: 000023fe
+Pushing to stack addr: 0406 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0020 at SP: 000023f4
+Triggered
+Triggered
+Pushing to stack addr: 005a at SP: 000023f4
+Pushing to stack addr: 0aa2 at SP: 000023fe
+Pushing to stack addr: 0202 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0a9e at SP: 000023fe
+Pushing to stack addr: 0202 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0020 at SP: 000023f4
+Triggered
+Triggered
+Pushing to stack addr: 005a at SP: 000023f4
+Pushing to stack addr: 0aa1 at SP: 000023fe
+Pushing to stack addr: 0202 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0aa2 at SP: 000023fe
+Pushing to stack addr: 0102 at SP: 000023fc
+Pushing to stack addr: 0003 at SP: 000023fa
+Pushing to stack addr: 1dbb at SP: 000023f8
+Pushing to stack addr: 3814 at SP: 000023f6
+Pushing to stack addr: 0020 at SP: 000023f4
+Triggered
+Triggered
+Pushing to stack addr: 005a at SP: 000023f4
+Pushing to stack addr: 1dbc at SP: 000023fe
+Pushing to stack addr: 0a98 at SP: 000023fc
+Pushing to stack addr: 3814 at SP: 000023fa
+Pushing to stack addr: 0802 at SP: 000023fa
+Pushing to stack addr: 0702 at SP: 000023fa
+Pushing to stack addr: 0602 at SP: 000023fa
+Pushing to stack addr: 0502 at SP: 000023fa
+Pushing to stack addr: 0402 at SP: 000023fa
+Pushing to stack addr: 0302 at SP: 000023fa
+Pushing to stack addr: 0202 at SP: 000023fa
+Pushing to stack addr: 0102 at SP: 000023fa
+Pushing to stack addr: 0a9e at SP: 000023fe
+Pushing to stack addr: 0606 at SP: 000023fc
+Pushing to stack addr: 0002 at SP: 000023fa
+Pushing to stack addr: 1dbc at SP: 000023f8
+Pushing to stack addr: 3914 at SP: 000023f6
+Pushing to stack addr: 0aa1 at SP: 000023fe
+Pushing to stack addr: 0706 at SP: 000023fc
+Pushing to stack addr: 0002 at SP: 000023fa
+Pushing to stack addr: 1dbc at SP: 000023f8
+Pushing to stack addr: 3914 at SP: 000023f6
+Pushing to stack addr: 0020 at SP: 000023f4
+Triggered
+Triggered

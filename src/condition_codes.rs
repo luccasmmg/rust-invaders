@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
-pub struct ConditionCodes {
+pub struct Flags {
     pub z: u8,
     pub s: u8,
     pub p: u8,
@@ -9,9 +9,9 @@ pub struct ConditionCodes {
     pub ac: u8,
 }
 
-impl ConditionCodes {
-    pub fn new() -> ConditionCodes {
-        ConditionCodes {
+impl Flags {
+    pub fn new() -> Flags {
+        Flags {
             z: 0,
             s: 0,
             p: 0,
@@ -21,7 +21,7 @@ impl ConditionCodes {
     }
 }
 
-impl fmt::Display for ConditionCodes {
+impl fmt::Display for Flags {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}{}{}{}",
                 self.z, self.s, self.p, self.cy)

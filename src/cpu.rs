@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::condition_codes::ConditionCodes;
+use crate::condition_codes::{Flags as ConditionCodes};
 use crate::op_arithmetic::*;
 use crate::op_data_transfer::*;
 use crate::helpers::get_value_memory;
@@ -84,7 +84,7 @@ impl CPUState {
             e: 0,
             h: 0,
             l: 0,
-            sp: 61440,
+            sp: 0,
             pc: 0,
             cycles: 0,
             memory: vec![0; MEMORY_SIZE],

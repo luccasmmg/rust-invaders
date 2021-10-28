@@ -4,11 +4,11 @@ use crate::op_special_io::op_in;
 
 pub fn handle_interrupts(machine: Machine) -> Machine {
     let opcode: u8 = machine.cpu.memory[machine.cpu.pc as usize];
-    let next_opcode: u8 = machine.cpu.memory[machine.cpu.pc.wrapping_add(1) as usize];
+    let next_opcode: u8 = machine.cpu.memory[(machine.cpu.pc as usize) + 1];
     match opcode {
         0xdb => in_space_invaders(machine, next_opcode),
         0xd3 => out_space_invaders(machine, next_opcode),
-        _ => machine
+        _ => { println!("WTF"); panic!() }
     }
 }
 

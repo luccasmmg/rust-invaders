@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::condition_codes::ConditionCodes;
+use crate::condition_codes::{Flags as ConditionCodes};
 use crate::cpu::CPUState;
 use crate::helpers::arith_flags_logs;
 
@@ -197,9 +197,9 @@ pub fn rrc(cpu: CPUState) -> CPUState {
     answer |= bit0 << 7;
     CPUState {
         cycles: 1,
-        pc: cpu.pc + 1,
+        pc: cpu.pc.wrapping_add(1),
         a: answer,
-        cc: ConditionCodes { cy: bit0, ..cpu.cc },
+        cc: ConditionCodes { cy: if bit0 != 0 { 1 } else { 0 }, ..cpu.cc },
         ..cpu
     }
 }

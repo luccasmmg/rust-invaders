@@ -119,7 +119,7 @@ pub fn lxi(cpu: CPUState, rs: (char, char), opcode_1: u8, opcode_2: u8) -> CPUSt
 }
 
 pub fn lda(cpu: CPUState, opcode_1: u8, opcode_2: u8) -> CPUState {
-    let address: u16 = (opcode_2 as u16) << 8 | opcode_1 as u16;
+    let address = ((cpu.memory[(cpu.pc as usize) + 2] as u16) << 8) | cpu.memory[(cpu.pc as usize) + 1] as u16;
     CPUState {
         a: cpu.memory[address as usize],
         cycles: 4,

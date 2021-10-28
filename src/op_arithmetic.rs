@@ -1,4 +1,4 @@
-use crate::condition_codes::ConditionCodes;
+use crate::condition_codes::{Flags as ConditionCodes};
 use crate::cpu::CPUState;
 use crate::cpu::WithSPPairs;
 use crate::helpers::{set_all_flags, arith_flags};

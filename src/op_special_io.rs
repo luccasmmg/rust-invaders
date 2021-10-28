@@ -25,10 +25,10 @@ pub fn hlt() {
 }
 
 pub fn op_in(cpu: CPUState, value: u8) -> CPUState {
+    println!("Triggered");
     CPUState {
         a: value,
         pc: cpu.pc.wrapping_add(2),
-        cycles: 10,
         ..cpu
     }
 }
