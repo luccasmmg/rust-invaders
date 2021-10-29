@@ -422,9 +422,10 @@ pub fn emulate_8080_op(cpu: CPUState) -> CPUState {
 
         //IO SPECIAL
         0xfb => ei(cpu),
+        0x27 => daa(cpu),
         0xf3 => di(cpu),
         0x76 => panic!(),
-        _ => panic!(),
+        _ => panic!("Unimplemented Opcode: 0x{:02x}", opcode),
 
     };
     let cycles: u8 = CYCLES8080[(opcode) as usize];

@@ -94,7 +94,7 @@ pub fn pop_from_stack(cpu: CPUState) -> (CPUState, u16) {
 }
 
 pub fn push_to_stack_addr(cpu: CPUState, addr : u16) -> CPUState {
-    println!("Pushing to stack addr: {:04x} at SP: {:08x}",addr, cpu.sp);
+    //println!("Pushing to stack addr: {:04x} at SP: {:08x}",addr, cpu.sp);
     let mut memory = cpu.memory;
     memory[cpu.sp as usize - 1] = (addr >> 8) as u8;
     memory[cpu.sp as usize - 2] = addr as u8;

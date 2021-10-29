@@ -21,7 +21,6 @@ use std::time::Duration;
 use invaders::emulate_invaders;
 use invaders::Machine;
 
-use cpu::CPUState;
 use helpers::{new_machine, generate_interrupt};
 
 use sdl2::keyboard::Keycode;
@@ -33,8 +32,8 @@ const SCALE_FACTOR: i32 = 3;
 const CYCLES_PER_FRAME:u64 = 4_000_000 / 60;
 
 fn main() -> io::Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let (mut machine, buffer) = new_machine();
+    let _args: Vec<String> = env::args().collect();
+    let (mut machine, _buffer) = new_machine();
 
     let sdl_context = sdl2::init().unwrap();
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -56,8 +55,8 @@ fn main() -> io::Result<()> {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
-                Event::KeyDown {keycode: Some(Keycode::A), .. } => machine.in_port1 |= 0x20,
-                Event::KeyDown {keycode: Some(Keycode::D), .. } => machine.in_port1 |= 0x40,
+                Event::KeyDown {keycode: Some(Keycode::A), .. } => { println!("Pressed A"); machine.in_port1 |= 0x20 },
+                Event::KeyDown {keycode: Some(Keycode::D), .. } => { println!("Pressed D"); machine.in_port1 |= 0x40 },
                 Event::KeyDown {keycode: Some(Keycode::W), .. } => machine.in_port1 |= 0x10,
 
                 Event::KeyDown {keycode: Some(Keycode::J), .. } => machine.in_port2 |= 0x20,
@@ -67,13 +66,7 @@ fn main() -> io::Result<()> {
                 Event::KeyDown {keycode: Some(Keycode::Num1), .. } => machine.in_port1 |= 0x04,
                 Event::KeyDown {keycode: Some(Keycode::Num2), .. } => machine.in_port1 |= 0x02,
 
-                Event::KeyDown {keycode: Some(Keycode::C), .. } => {
-                    println!("Pressed key");
-                    // for val in &machine.cpu.memory {
-                    //     println!("{}", val);
-                    // }
-                    machine.in_port1 |= 0x1
-                },
+                Event::KeyDown {keycode: Some(Keycode::C), .. } => machine.in_port1 |= 0x1,
 
 
                 Event::KeyUp {keycode: Some(Keycode::A), .. } => machine.in_port1 &= !0x20,

@@ -46,7 +46,7 @@ impl Machine {
 
 pub fn emulate_invaders(machine: Machine) -> Machine {
     let opcode: u8 = machine.cpu.memory[machine.cpu.pc as usize];
-    println!("Opcode = {} PC = {}, SP = {}", opcode, machine.cpu.pc, machine.cpu.sp);
+    //println!("Opcode = {} PC = {}, SP = {}", opcode, machine.cpu.pc, machine.cpu.sp);
     match opcode {
         0xdb | 0xd3 => handle_interrupts(machine),
         _ => Machine { cpu: emulate_8080_op(machine.cpu), ..machine}

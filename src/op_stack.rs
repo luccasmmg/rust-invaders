@@ -52,7 +52,7 @@ pub fn push_psw(cpu: CPUState) -> CPUState {
     let mut psw:u16 = 0;
     let s = if cpu.cc.s == 1 { 1 } else { 0 };
     let z = if cpu.cc.z == 1 { 1 } else { 0 };
-    let ac = 0;
+    let ac = if cpu.cc.ac == 1 { 1 } else { 0 };
     let p = if cpu.cc.p == 1 { 1 } else { 0 };
     let cy = if cpu.cc.cy == 1 { 1 } else { 0 };
 
