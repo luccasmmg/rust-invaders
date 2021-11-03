@@ -186,7 +186,7 @@ pub fn rlc(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy: bit7, ..cpu.cc },
+        cc: ConditionCodes { cy: if bit7 != 0 { 1 } else { 0 }, ..cpu.cc },
         ..cpu
     }
 }
@@ -212,7 +212,7 @@ pub fn rar(cpu: CPUState) -> CPUState {
         cycles: 1,
         pc: cpu.pc + 1,
         a: answer,
-        cc: ConditionCodes { cy: bit0, ..cpu.cc },
+        cc: ConditionCodes { cy: if bit0 != 0 { 1 } else { 0 }, ..cpu.cc },
         ..cpu
     }
 }

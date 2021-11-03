@@ -55,8 +55,8 @@ fn main() -> io::Result<()> {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
-                Event::KeyDown {keycode: Some(Keycode::A), .. } => { println!("Pressed A"); machine.in_port1 |= 0x20 },
-                Event::KeyDown {keycode: Some(Keycode::D), .. } => { println!("Pressed D"); machine.in_port1 |= 0x40 },
+                Event::KeyDown {keycode: Some(Keycode::A), .. } => machine.in_port1 |= 0x20,
+                Event::KeyDown {keycode: Some(Keycode::D), .. } => machine.in_port1 |= 0x40,
                 Event::KeyDown {keycode: Some(Keycode::W), .. } => machine.in_port1 |= 0x10,
 
                 Event::KeyDown {keycode: Some(Keycode::J), .. } => machine.in_port2 |= 0x20,
@@ -97,12 +97,9 @@ fn main() -> io::Result<()> {
 fn half_step(mut machine: Machine, canvas: &mut sdl2::render::Canvas<sdl2::video::Window>, top_half: bool) -> Machine {
     let mut cycles_spent:u128 = 0;
     while cycles_spent < (CYCLES_PER_FRAME / 2) as u128 {
-        //println!("PC {:04x}", machine.cpu.pc);
-        //println!("Flags {}", machine.cpu.cc);
         machine = emulate_invaders(machine);
         cycles_spent += machine.cpu.cycles as u128;
     }
-    //println!("{}", cycles_spent);
     redraw_screen(canvas, &machine, top_half);
     let int_enable = machine.cpu.int_enable;
     if int_enable {

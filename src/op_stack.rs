@@ -65,7 +65,6 @@ pub fn push_psw(cpu: CPUState) -> CPUState {
     psw |= 1 << 1;
     psw |= cy;
     psw |= (cpu.a as u16) << 8;
-    //println!("S: {}, Z: {}, AC: {}, P: {}, CY: {}, PSW: {}, A_Register: {}", s, z, ac, p, cy, psw, cpu.a);
     CPUState {
         pc: cpu.pc.wrapping_add(1),
         ..push_to_stack_addr(cpu, psw)
